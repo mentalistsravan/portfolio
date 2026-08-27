@@ -110,15 +110,3 @@
 .tracking-subtle {
   letter-spacing: 0.15em;
 }
-
-/* Hide default cursor on desktop when custom cursor active */
-@media (min-width: 1024px) {
-  body.custom-cursor-active {
-    cursor: none;
-  }
-  body.custom-cursor-active a,
-  body.custom-cursor-active button,
-  body.custom-cursor-active [role="button"] {
-    cursor: none;
-  }
-}

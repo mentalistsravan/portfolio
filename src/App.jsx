@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Navigation } from './components/Navigation';
-import { CustomCursor } from './components/CustomCursor';
 import { LoadingScreen } from './components/LoadingScreen';
 import { InteractiveMicroExperience } from './components/InteractiveMicroExperience';
 import { ArchiveSection } from './components/ArchiveLightbox';
@@ -14,10 +13,11 @@ import {
   InsiderVisual,
   StagePerformanceVisual,
   LogoEmblem,
-  sravanTriple
+  sravanTriple,
+  InstagramIcon
 } from './components/SravanVisuals';
 
-import { ArrowDown, Play, ChevronRight, Sparkles, Clock, Crown, Shield } from 'lucide-react';
+import { ArrowDown, Play, ChevronRight, Crown, ExternalLink } from 'lucide-react';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -36,9 +36,6 @@ export default function App() {
 
       {/* Opening Loading Sequence */}
       {loading && <LoadingScreen onComplete={() => setLoading(false)} />}
-
-      {/* Custom Desktop Cursor */}
-      <CustomCursor />
 
       {/* Navigation Header */}
       <Navigation />
@@ -81,14 +78,12 @@ export default function App() {
                 <a
                   href="#mentalist"
                   className="px-8 py-4 bg-[#C5A059] text-[#050505] hover:bg-[#8E1018] hover:text-[#F2EFE9] text-xs font-cinzel tracking-[0.25em] uppercase font-bold transition-all duration-300 shadow-xl rounded-sm"
-                  data-cursor="ENTER"
                 >
                   ENTER THE EXPERIENCE
                 </a>
                 <a
                   href="#booking"
                   className="px-8 py-4 border-2 border-[#C5A059]/40 hover:border-[#C5A059] text-[#F2EFE9] text-xs font-cinzel tracking-[0.25em] uppercase transition-all duration-300 rounded-sm bg-[#080808]/80"
-                  data-cursor="BOOK"
                 >
                   BOOK SRAVAN
                 </a>
@@ -150,7 +145,7 @@ export default function App() {
             </div>
 
             {/* Sravan Triple Portrait Framing */}
-            <div className="lg:col-span-5 h-[480px] lg:h-[580px] rounded-sm overflow-hidden border-2 border-[#C5A059]/40 shadow-2xl relative bg-[#050505] p-3" data-cursor="VIEW">
+            <div className="lg:col-span-5 h-[480px] lg:h-[580px] rounded-sm overflow-hidden border-2 border-[#C5A059]/40 shadow-2xl relative bg-[#050505] p-3">
               <img src={sravanTriple} alt="Mentalist Sravan Portrait" className="w-full h-full object-contain" />
               <div className="absolute bottom-4 left-4 text-xs font-cinzel text-[#C5A059] tracking-widest uppercase">
                 MENTALIST SRAVAN
@@ -211,7 +206,7 @@ export default function App() {
             {/* Editorial Experience Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* HISTORY SHOW Card */}
-              <div className="bg-[#0c0a07] border-2 border-[#C5A059]/60 p-8 rounded-sm flex flex-col justify-between group transition-all duration-500 hover:-translate-y-1 shadow-xl" data-cursor="ENTER">
+              <div className="bg-[#0c0a07] border-2 border-[#C5A059]/60 p-8 rounded-sm flex flex-col justify-between group transition-all duration-500 hover:-translate-y-1 shadow-xl">
                 <div>
                   <div className="flex items-center justify-between text-[11px] text-[#C5A059] font-cinzel tracking-widest uppercase mb-6">
                     <span>YEAR: 2025</span>
@@ -230,7 +225,7 @@ export default function App() {
               </div>
 
               {/* MIRAGE Card */}
-              <div className="bg-[#0c0a07] border-2 border-[#C5A059]/30 hover:border-[#C5A059] p-8 rounded-sm flex flex-col justify-between group transition-all duration-500 hover:-translate-y-1" data-cursor="ENTER">
+              <div className="bg-[#0c0a07] border-2 border-[#C5A059]/30 hover:border-[#C5A059] p-8 rounded-sm flex flex-col justify-between group transition-all duration-500 hover:-translate-y-1">
                 <div>
                   <div className="flex items-center justify-between text-[11px] text-[#B8B0A5] font-cinzel tracking-widest uppercase mb-6">
                     <span>YEAR: 2025</span>
@@ -249,7 +244,7 @@ export default function App() {
               </div>
 
               {/* INSIDER Card */}
-              <div className="bg-[#0c0a07] border-2 border-[#C5A059]/30 hover:border-[#C5A059] p-8 rounded-sm flex flex-col justify-between group transition-all duration-500 hover:-translate-y-1" data-cursor="ENTER">
+              <div className="bg-[#0c0a07] border-2 border-[#C5A059]/30 hover:border-[#C5A059] p-8 rounded-sm flex flex-col justify-between group transition-all duration-500 hover:-translate-y-1">
                 <div>
                   <div className="flex items-center justify-between text-[11px] text-[#B8B0A5] font-cinzel tracking-widest uppercase mb-6">
                     <span>YEAR: 2024</span>
@@ -272,7 +267,7 @@ export default function App() {
 
 
         {/* ==================================================
-            NEW SHOW — HISTORY SHOW (REPLACES PHYSIC & SEALED CONFESSION)
+            FEATURED PRODUCTION SHOW — HISTORY SHOW
         ================================================== */}
         <section id="historyshow" className="w-full bg-[#050505] text-[#F2EFE9] px-6 md:px-12 py-28 border-b-2 border-[#C5A059]/30">
           <div className="max-w-7xl mx-auto space-y-12">
@@ -322,7 +317,6 @@ export default function App() {
               <button
                 onClick={() => openVideo('HISTORY SHOW — THEATRICAL TRAILER')}
                 className="px-8 py-4 bg-[#C5A059] hover:bg-[#8E1018] text-[#050505] hover:text-[#F2EFE9] font-cinzel text-xs tracking-[0.25em] uppercase font-bold transition-all duration-300 inline-flex items-center gap-3 shadow-xl rounded-sm"
-                data-cursor="WATCH"
               >
                 <Play className="w-4 h-4 fill-current" /> WATCH HISTORY SHOW TRAILER
               </button>
@@ -351,32 +345,6 @@ export default function App() {
             </div>
 
             <MirageVisual />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6">
-              <div className="p-6 bg-[#0a0a0a] border border-[#1a1a1a] rounded-sm">
-                <span className="text-xs text-[#C5A059] font-cinzel tracking-widest uppercase block mb-2">01 / DISCIPLINE</span>
-                <h4 className="text-lg font-serif text-[#F2EFE9] uppercase mb-2">THE EXPERIENCE</h4>
-                <p className="text-xs text-[#B8B0A5] leading-relaxed font-light">
-                  A theatrical mentalism experience built around perception, expectation and the fragile boundary between certainty and illusion.
-                </p>
-              </div>
-
-              <div className="p-6 bg-[#0a0a0a] border border-[#1a1a1a] rounded-sm">
-                <span className="text-xs text-[#C5A059] font-cinzel tracking-widest uppercase block mb-2">02 / TEMPORALITY</span>
-                <h4 className="text-lg font-serif text-[#F2EFE9] uppercase mb-2">THE MOMENT</h4>
-                <p className="text-xs text-[#B8B0A5] leading-relaxed font-light">
-                  An unscripted psychological convergence where audience decisions alter the arc of the performance in real-time.
-                </p>
-              </div>
-
-              <div className="p-6 bg-[#0a0a0a] border border-[#1a1a1a] rounded-sm">
-                <span className="text-xs text-[#C5A059] font-cinzel tracking-widest uppercase block mb-2">03 / RESONANCE</span>
-                <h4 className="text-lg font-serif text-[#F2EFE9] uppercase mb-2">THE MEMORY</h4>
-                <p className="text-xs text-[#B8B0A5] leading-relaxed font-light">
-                  A lasting impression that lingers long after the house lights return, challenging what was witnessed.
-                </p>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -401,41 +369,12 @@ export default function App() {
             </div>
 
             <InsiderVisual />
-
-            <div className="max-w-3xl mx-auto text-center space-y-4">
-              <p className="text-xl md:text-2xl font-serif text-[#F2EFE9] italic">
-                "What happens when two seemingly separate paths begin to converge?"
-              </p>
-              <p className="text-sm text-[#B8B0A5] font-light">
-                INSIDER explores the strange territory between choice, coincidence and connection.
-              </p>
-            </div>
           </div>
         </section>
 
 
         {/* ==================================================
-            PAGE 10 — THE PERFORMER
-        ================================================== */}
-        <section className="w-full bg-[#080808] text-[#F2EFE9] px-6 md:px-12 py-28 border-b border-[#1a1a1a]">
-          <div className="max-w-7xl mx-auto space-y-12">
-            <div className="text-center space-y-4 max-w-3xl mx-auto">
-              <span className="text-xs text-[#C5A059] tracking-[0.3em] uppercase font-cinzel block">
-                LIVE PERFORMANCE
-              </span>
-              <h2 className="text-4xl md:text-6xl font-serif tracking-tight uppercase text-[#F2EFE9]">
-                THE STAGE <br />
-                <span className="italic text-[#C5A059]">CHANGES EVERYTHING.</span>
-              </h2>
-            </div>
-
-            <StagePerformanceVisual />
-          </div>
-        </section>
-
-
-        {/* ==================================================
-            PAGE 11 — THE ARCHIVE
+            PAGE 11 — INSTAGRAM ARCHIVE & MEDIA SECTION
         ================================================== */}
         <ArchiveSection />
 
@@ -484,36 +423,6 @@ export default function App() {
 
 
         {/* ==================================================
-            PAGE 14 — PRESS / CREDIBILITY
-        ================================================== */}
-        <section className="w-full bg-[#050505] text-[#F2EFE9] px-6 md:px-12 py-24 border-b border-[#1a1a1a]">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <span className="text-xs text-[#C5A059] tracking-[0.3em] uppercase font-cinzel mb-3 block">
-                ENGAGEMENT & MEDIA
-              </span>
-              <h2 className="text-3xl md:text-5xl font-serif tracking-tight uppercase">
-                IN THE WORLD
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-6 text-center">
-              {['PRESS', 'INTERVIEWS', 'FEATURES', 'EVENTS', 'COLLABORATIONS', 'MEDIA'].map((badge) => (
-                <div key={badge} className="p-6 bg-[#0a0a0a] border-2 border-[#C5A059]/30 rounded-sm flex flex-col items-center justify-center">
-                  <span className="text-xs font-cinzel tracking-widest text-[#B8B0A5] uppercase">
-                    {badge}
-                  </span>
-                  <span className="text-[9px] text-[#C5A059] font-mono tracking-widest uppercase mt-2">
-                    [ VERIFIED ENTRY ]
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-
-        {/* ==================================================
             PAGE 15 — BOOKING
         ================================================== */}
         <BookingForm onOpenShowreel={() => openVideo('MENTALIST SRAVAN — SHOWREEL')} />
@@ -547,8 +456,8 @@ export default function App() {
           </div>
 
           <div className="md:col-span-3 space-y-2 text-xs font-cinzel tracking-widest text-[#B8B0A5] uppercase">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="block hover:text-[#C5A059] transition-colors">
-              INSTAGRAM ↗
+            <a href="https://www.instagram.com/mentalist_sravan/" target="_blank" rel="noopener noreferrer" className="block hover:text-[#C5A059] transition-colors flex items-center gap-1">
+              INSTAGRAM <InstagramIcon className="w-3.5 h-3.5" /> ↗
             </a>
             <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="block hover:text-[#C5A059] transition-colors">
               YOUTUBE ↗
