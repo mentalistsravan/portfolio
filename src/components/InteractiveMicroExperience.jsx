@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, Eye, Key, Compass } from 'lucide-react';
+import React, { useState } from 'react';
+import { Eye, Key, Compass } from 'lucide-react';
 
 export const InteractiveMicroExperience = () => {
   const [phase, setPhase] = useState('intro1'); // intro1, intro2, intro3, selection, calculating, reveal
@@ -25,10 +25,7 @@ export const InteractiveMicroExperience = () => {
   };
 
   return (
-    <section className="relative w-full min-h-screen bg-[#030303] text-[#F2EFE9] flex flex-col items-center justify-center px-6 py-24 border-y border-[#1a1a1a] overflow-hidden">
-      {/* Dark Ambient Spotlight */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#14080a_0%,_#030303_85%)] pointer-events-none" />
-
+    <section className="relative w-full min-h-screen bg-black text-[#F2EFE9] flex flex-col items-center justify-center px-6 py-24 border-y border-white/10 overflow-hidden">
       <div className="max-w-3xl w-full text-center relative z-10">
         <span className="text-xs text-[#8E1018] tracking-[0.3em] uppercase font-cinzel mb-8 block">
           PAGE 13 / THE EXPERIENCE
@@ -42,8 +39,7 @@ export const InteractiveMicroExperience = () => {
             </h2>
             <button
               onClick={() => setPhase('intro2')}
-              className="mt-8 px-8 py-3 text-xs tracking-widest font-cinzel text-[#B8B0A5] hover:text-[#F2EFE9] border border-[#1a1a1a] hover:border-[#8E1018] transition-all duration-300 uppercase"
-              data-cursor="GO"
+              className="mt-8 px-8 py-3 text-xs tracking-widest font-cinzel text-[#B8B0A5] hover:text-[#F2EFE9] border border-white/20 hover:border-white transition-all duration-300 uppercase"
             >
               CONTINUE →
             </button>
@@ -58,7 +54,6 @@ export const InteractiveMicroExperience = () => {
             <button
               onClick={() => setPhase('intro3')}
               className="mt-8 px-8 py-3 text-xs tracking-widest font-cinzel text-[#8E1018] hover:text-[#F2EFE9] border border-[#8E1018]/50 hover:border-[#8E1018] transition-all duration-300 uppercase"
-              data-cursor="GO"
             >
               PROCEED →
             </button>
@@ -75,8 +70,7 @@ export const InteractiveMicroExperience = () => {
             </p>
             <button
               onClick={() => setPhase('selection')}
-              className="mt-8 px-10 py-4 text-xs tracking-[0.25em] font-cinzel text-[#050505] bg-[#F2EFE9] hover:bg-[#8E1018] hover:text-[#F2EFE9] transition-all duration-500 uppercase font-semibold"
-              data-cursor="ENTER"
+              className="mt-8 px-10 py-4 text-xs tracking-[0.25em] font-cinzel text-black bg-[#F2EFE9] hover:bg-[#8E1018] hover:text-[#F2EFE9] transition-all duration-500 uppercase font-semibold"
             >
               ENTER THE TEST
             </button>
@@ -100,10 +94,9 @@ export const InteractiveMicroExperience = () => {
                   <button
                     key={sym.id}
                     onClick={() => handleSelect(sym)}
-                    className="p-8 bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#8E1018] rounded-sm flex flex-col items-center justify-center group transition-all duration-500 hover:-translate-y-1"
-                    data-cursor="CHOOSE"
+                    className="p-8 bg-black hover:bg-white/5 flex flex-col items-center justify-center group transition-all duration-300"
                   >
-                    <IconComponent className="w-12 h-12 text-[#B8B0A5] group-hover:text-[#8E1018] transition-colors duration-500 mb-4" />
+                    <IconComponent className="w-12 h-12 text-[#B8B0A5] group-hover:text-[#8E1018] transition-colors duration-300 mb-4" />
                     <span className="text-xs font-cinzel tracking-widest uppercase text-[#F2EFE9] group-hover:text-[#8E1018]">
                       {sym.name}
                     </span>
@@ -120,24 +113,21 @@ export const InteractiveMicroExperience = () => {
         {/* Phase 5: Calculating animation */}
         {phase === 'calculating' && (
           <div className="py-16 space-y-6 animate-[fadeIn_0.5s_ease-out]">
-            <div className="w-16 h-16 border-2 border-[#1a1a1a] border-t-[#8E1018] rounded-full animate-spin mx-auto" />
+            <div className="w-16 h-16 border-2 border-white/10 border-t-[#8E1018] rounded-full animate-spin mx-auto" />
             <p className="text-xs font-cinzel tracking-[0.3em] text-[#B8B0A5] uppercase animate-pulse">
               ANALYZING PSYCHOLOGICAL PATTERNS...
-            </p>
-            <p className="text-[10px] font-mono text-[#8E1018] opacity-60">
-              [LATENCY CORRELATION DETECTED]
             </p>
           </div>
         )}
 
         {/* Phase 6: Reveal */}
         {phase === 'reveal' && selectedSymbol && (
-          <div className="space-y-8 animate-[fadeIn_1s_ease-out] bg-[#080808] p-8 md:p-12 border border-[#8E1018]/40 rounded-sm">
+          <div className="space-y-8 animate-[fadeIn_1s_ease-out] bg-black p-8 md:p-12">
             <span className="text-[10px] text-[#8E1018] tracking-[0.3em] uppercase font-mono block">
               PSYCHOLOGICAL REVEAL
             </span>
 
-            <div className="w-20 h-20 mx-auto rounded-full bg-[#12080a] border border-[#8E1018] flex items-center justify-center text-[#8E1018]">
+            <div className="w-20 h-20 mx-auto rounded-full bg-black border border-[#8E1018] flex items-center justify-center text-[#8E1018]">
               {selectedSymbol.id === 'eye' && <Eye className="w-10 h-10 text-[#F2EFE9]" />}
               {selectedSymbol.id === 'key' && <Key className="w-10 h-10 text-[#F2EFE9]" />}
               {selectedSymbol.id === 'compass' && <Compass className="w-10 h-10 text-[#F2EFE9]" />}
@@ -148,21 +138,19 @@ export const InteractiveMicroExperience = () => {
             </h3>
 
             <p className="text-sm md:text-base text-[#B8B0A5] font-light leading-relaxed max-w-lg mx-auto">
-              You believe you made a free choice. But your eyes lingered on the contrast of the dark borders for precisely 420 milliseconds before clicking. The mind does not select randomly — it moves towards what it has already expected.
+              You believe you made a free choice. But your eyes lingered on the contrast for precisely 420 milliseconds before clicking. The mind does not select randomly — it moves towards what it has already expected.
             </p>
 
-            <div className="pt-4 border-t border-[#1a1a1a] flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={handleReset}
-                className="px-6 py-2.5 text-xs font-cinzel tracking-widest text-[#B8B0A5] hover:text-[#F2EFE9] border border-[#1a1a1a] hover:border-[#8E1018] transition-all uppercase"
-                data-cursor="TEST"
+                className="px-6 py-2.5 text-xs font-cinzel tracking-widest text-[#B8B0A5] hover:text-[#F2EFE9] border border-white/20 hover:border-white transition-all uppercase"
               >
                 TRY AGAIN
               </button>
               <a
                 href="#booking"
-                className="px-6 py-2.5 text-xs font-cinzel tracking-widest text-[#050505] bg-[#F2EFE9] hover:bg-[#8E1018] hover:text-[#F2EFE9] transition-all uppercase font-bold"
-                data-cursor="BOOK"
+                className="px-6 py-2.5 text-xs font-cinzel tracking-widest text-black bg-[#F2EFE9] hover:bg-[#8E1018] hover:text-[#F2EFE9] transition-all uppercase font-bold"
               >
                 BOOK THE LIVE EXPERIENCE →
               </a>

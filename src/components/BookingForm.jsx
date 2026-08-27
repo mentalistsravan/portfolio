@@ -18,10 +18,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
   };
 
   return (
-    <section id="booking" className="w-full bg-[#030303] text-[#F2EFE9] px-6 md:px-12 py-28 border-t border-[#1a1a1a] relative overflow-hidden">
-      {/* Background Lighting */}
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#8E1018] opacity-10 blur-[140px] pointer-events-none rounded-full" />
-
+    <section id="booking" className="w-full bg-black text-[#F2EFE9] px-6 md:px-12 py-28 border-t border-white/10 relative overflow-hidden">
       <div className="max-w-5xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <span className="text-xs text-[#8E1018] tracking-[0.3em] uppercase font-cinzel mb-4 block">
@@ -37,23 +34,21 @@ export const BookingForm = ({ onOpenShowreel }) => {
           <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
             <a
               href="#booking-form"
-              className="px-8 py-3.5 text-xs font-cinzel tracking-[0.25em] text-[#050505] bg-[#F2EFE9] hover:bg-[#8E1018] hover:text-[#F2EFE9] transition-all duration-300 uppercase font-semibold"
-              data-cursor="GO"
+              className="px-8 py-3.5 text-xs font-cinzel tracking-[0.25em] text-black bg-[#F2EFE9] hover:bg-[#8E1018] hover:text-[#F2EFE9] transition-all duration-300 uppercase font-semibold"
             >
               BOOK THE EXPERIENCE
             </a>
             <button
               onClick={onOpenShowreel}
-              className="px-8 py-3.5 text-xs font-cinzel tracking-[0.25em] text-[#F2EFE9] border border-[#1a1a1a] hover:border-[#8E1018] transition-all duration-300 uppercase"
-              data-cursor="WATCH"
+              className="px-8 py-3.5 text-xs font-cinzel tracking-[0.25em] text-[#F2EFE9] border border-white/20 hover:border-white transition-all duration-300 uppercase"
             >
-              WATCH THE SHOWREEL
+              STREAM SHOWREEL IN SITE
             </button>
           </div>
         </div>
 
-        {/* Contact Form */}
-        <div id="booking-form" className="bg-[#0a0a0a] border border-[#1f1f1f] p-8 md:p-14 rounded-sm max-w-3xl mx-auto">
+        {/* Contact Form Plain */}
+        <div id="booking-form" className="bg-black p-4 md:p-8 max-w-3xl mx-auto">
           {submitted ? (
             <div className="text-center py-12 space-y-4 animate-[fadeIn_0.5s_ease-out]">
               <CheckCircle2 className="w-14 h-14 text-[#8E1018] mx-auto" />
@@ -83,7 +78,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Full Name"
-                    className="w-full bg-[#050505] border border-[#1a1a1a] focus:border-[#8E1018] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
                   />
                 </div>
 
@@ -97,7 +92,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="email@domain.com"
-                    className="w-full bg-[#050505] border border-[#1a1a1a] focus:border-[#8E1018] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -110,7 +105,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
                   <select
                     value={formData.eventType}
                     onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
-                    className="w-full bg-[#050505] border border-[#1a1a1a] focus:border-[#8E1018] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
                   >
                     <option value="Theatrical Engagement">Theatrical Engagement</option>
                     <option value="Private Experience">Private Experience</option>
@@ -127,7 +122,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full bg-[#050505] border border-[#1a1a1a] focus:border-[#8E1018] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
                   />
                 </div>
 
@@ -140,7 +135,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder="City, Country"
-                    className="w-full bg-[#050505] border border-[#1a1a1a] focus:border-[#8E1018] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -154,14 +149,13 @@ export const BookingForm = ({ onOpenShowreel }) => {
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   placeholder="Share details regarding audience size, venue atmospheric preferences, or specific inquiries..."
-                  className="w-full bg-[#050505] border border-[#1a1a1a] focus:border-[#8E1018] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors resize-none"
+                  className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors resize-none"
                 />
               </div>
 
               <button
                 type="submit"
                 className="w-full py-4 bg-[#8E1018] hover:bg-[#a6131c] text-[#F2EFE9] font-cinzel text-xs tracking-[0.3em] uppercase font-bold transition-all duration-300 flex items-center justify-center gap-2 group"
-                data-cursor="SUBMIT"
               >
                 BEGIN THE CONVERSATION
                 <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
