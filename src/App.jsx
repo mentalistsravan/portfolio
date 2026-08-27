@@ -15,11 +15,10 @@ import {
   PhysicHourVisual,
   SealedConfessionVisual,
   InsiderVisual,
-  CraftItemVisual,
   StagePerformanceVisual
 } from './components/SravanVisuals';
 
-import { ArrowDown, Play, ChevronRight, Layers, Eye, BookOpen, Clock, Radio } from 'lucide-react';
+import { ArrowDown, Play, ChevronRight } from 'lucide-react';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -51,7 +50,7 @@ export default function App() {
         ================================================== */}
         <section className="relative w-full h-screen min-h-[700px] bg-[#050505] flex flex-col justify-between px-6 md:px-12 py-20 overflow-hidden">
           {/* Hero Portrait Background */}
-          <div className="absolute inset-0 z-0 opacity-85">
+          <div className="absolute inset-0 z-0 opacity-90">
             <HeroPortraitVisual />
           </div>
 
@@ -147,7 +146,7 @@ export default function App() {
         ================================================== */}
         <section className="relative w-full min-h-[80vh] bg-[#050505] text-[#F2EFE9] px-6 md:px-12 py-32 flex items-center justify-center overflow-hidden border-t border-[#1a1a1a]">
           {/* Close up background */}
-          <div className="absolute inset-0 opacity-40 pointer-events-none">
+          <div className="absolute inset-0 opacity-50 pointer-events-none">
             <PhilosophyCloseUpVisual />
           </div>
 
@@ -439,40 +438,6 @@ export default function App() {
 
 
         {/* ==================================================
-            PAGE 09 — THE CRAFT
-        ================================================== */}
-        <section id="craft" className="w-full bg-[#080808] text-[#F2EFE9] px-6 md:px-12 py-28 border-t border-[#1a1a1a]">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-              <div>
-                <span className="text-xs text-[#8E1018] tracking-[0.3em] uppercase font-cinzel mb-3 block">
-                  03 / PHYSICAL LANGUAGE
-                </span>
-                <h2 className="text-4xl md:text-6xl font-serif tracking-tight uppercase">
-                  THE <br /> CRAFT
-                </h2>
-              </div>
-              <p className="text-sm md:text-base font-cinzel text-[#B8B0A5] tracking-widest uppercase italic max-w-md">
-                Behind every impossible moment is an obsession with detail.
-              </p>
-            </div>
-
-            {/* Objects Gallery */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-              <CraftItemVisual type="cards" title="CARDS" />
-              <CraftItemVisual type="coins" title="COINS" />
-              <CraftItemVisual type="books" title="BOOKS" />
-              <CraftItemVisual type="cubes" title="CUBES" />
-              <CraftItemVisual type="letters" title="LETTERS" />
-              <CraftItemVisual type="watches" title="WATCHES" />
-              <CraftItemVisual type="predictions" title="PREDICTIONS" />
-              <CraftItemVisual type="memory" title="MEMORY" />
-            </div>
-          </div>
-        </section>
-
-
-        {/* ==================================================
             PAGE 10 — THE PERFORMER
         ================================================== */}
         <section className="w-full bg-[#050505] text-[#F2EFE9] px-6 md:px-12 py-28 border-t border-[#1a1a1a]">
@@ -518,7 +483,7 @@ export default function App() {
 
             <div className="lg:col-span-7 space-y-6">
               <span className="text-xs text-[#8E1018] tracking-[0.3em] uppercase font-cinzel block">
-                05 / THE ARTIST
+                04 / THE ARTIST
               </span>
               <h2 className="text-4xl md:text-6xl font-serif tracking-tight uppercase leading-none">
                 BEHIND <br />
@@ -604,7 +569,6 @@ export default function App() {
           <div className="md:col-span-3 space-y-2 text-xs font-cinzel tracking-widest text-[#B8B0A5] uppercase">
             <a href="#mentalist" className="block hover:text-[#F2EFE9] transition-colors">THE MENTALIST</a>
             <a href="#experiences" className="block hover:text-[#F2EFE9] transition-colors">EXPERIENCES</a>
-            <a href="#craft" className="block hover:text-[#F2EFE9] transition-colors">CRAFT</a>
             <a href="#archive" className="block hover:text-[#F2EFE9] transition-colors">ARCHIVE</a>
             <a href="#about" className="block hover:text-[#F2EFE9] transition-colors">ABOUT</a>
             <a href="#booking" className="block hover:text-[#F2EFE9] transition-colors">BOOK</a>

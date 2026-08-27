@@ -17,7 +17,6 @@ export const Navigation = () => {
   const navLinks = [
     { name: 'THE MENTALIST', href: '#mentalist' },
     { name: 'EXPERIENCES', href: '#experiences' },
-    { name: 'CRAFT', href: '#craft' },
     { name: 'ARCHIVE', href: '#archive' },
     { name: 'ABOUT', href: '#about' },
     { name: 'BOOK', href: '#booking' },
