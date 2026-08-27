@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { LoadingScreen } from './components/LoadingScreen';
 import { InteractiveMicroExperience } from './components/InteractiveMicroExperience';
-import { ArchiveSection } from './components/ArchiveLightbox';
+import { PortraitGallery } from './components/PortraitGallery';
 import { VideoModal } from './components/VideoModal';
 import { BookingForm } from './components/BookingForm';
 
@@ -14,6 +14,9 @@ import {
   StagePerformanceVisual,
   LogoEmblem,
   sravanTriple,
+  sravanHandsSuit,
+  sravanSpotlight,
+  sravanSideProfile,
   InstagramIcon
 } from './components/SravanVisuals';
 
@@ -85,7 +88,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Second Image (Triple Portrait) - Unclipped Plain */}
+            {/* Hero Visual (Spotlight Portrait) */}
             <div className="lg:col-span-6 h-[480px] sm:h-[580px] lg:h-[650px] w-full z-10">
               <HeroTriplePortraitVisual className="h-full w-full" />
             </div>
@@ -139,24 +142,27 @@ export default function App() {
               </div>
             </div>
 
-            {/* Sravan Triple Portrait Visual Plain */}
-            <div className="lg:col-span-5 h-[480px] lg:h-[580px] overflow-hidden bg-black">
-              <img src={sravanTriple} alt="Mentalist Sravan Portrait" className="w-full h-full object-contain" />
+            {/* Sravan Clasped Hands Suit Portrait */}
+            <div className="lg:col-span-5 h-[480px] lg:h-[580px] overflow-hidden bg-black flex items-center justify-center">
+              <img src={sravanHandsSuit} alt="Mentalist Sravan Portrait" className="w-full h-full object-contain filter brightness-105 contrast-110" />
             </div>
           </div>
         </section>
 
 
         {/* ==================================================
-            PAGE 03 — THE PHILOSOPHY (PLAIN PURE BLACK)
+            PAGE 03 — THE PHILOSOPHY (WITH SHADOW PROFILE)
         ================================================== */}
-        <section className="relative w-full min-h-[70vh] bg-black text-[#F2EFE9] px-6 md:px-12 py-28 flex items-center justify-center border-b border-white/10">
-          <div className="max-w-4xl mx-auto text-center space-y-10">
+        <section className="relative w-full min-h-[70vh] bg-black text-[#F2EFE9] px-6 md:px-12 py-28 flex items-center justify-center border-b border-white/10 overflow-hidden">
+          <div className="absolute inset-0 opacity-20 flex items-center justify-center pointer-events-none">
+            <img src={sravanSideProfile} alt="Shadow Profile" className="w-full h-full object-cover filter contrast-125 brightness-75" />
+          </div>
+          <div className="relative z-10 max-w-4xl mx-auto text-center space-y-10">
             <span className="text-xs text-[#C5A059] tracking-[0.3em] uppercase font-cinzel block">
               PHILOSOPHY
             </span>
 
-            <h2 className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-widest uppercase leading-tight text-[#F2EFE9]">
+            <h2 className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-widest uppercase leading-tight text-[#F2EFE9] drop-shadow-lg">
               THE MIND <br />
               IS THE MOST <br />
               <span className="italic text-[#8E1018]">INTERESTING</span> STAGE.
@@ -195,7 +201,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Plain Experience List */}
+            {/* Experience List */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {/* HISTORY SHOW */}
               <div className="bg-black flex flex-col justify-between group space-y-4">
@@ -372,9 +378,9 @@ export default function App() {
 
 
         {/* ==================================================
-            PAGE 11 — STREAMABLE MEDIA ARCHIVE SECTION
+            PAGE 11 — PORTRAIT GALLERY SECTION (REPLACING ARCHIVE)
         ================================================== */}
-        <ArchiveSection />
+        <PortraitGallery />
 
 
         {/* ==================================================
@@ -382,8 +388,8 @@ export default function App() {
         ================================================== */}
         <section id="about" className="w-full bg-black text-[#F2EFE9] px-6 md:px-12 py-28 border-b border-white/10">
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-5 h-[480px] overflow-hidden bg-black">
-              <img src={sravanTriple} alt="Mentalist Sravan" className="w-full h-full object-contain" />
+            <div className="lg:col-span-5 h-[480px] lg:h-[550px] overflow-hidden bg-black flex items-center justify-center">
+              <img src={sravanSpotlight} alt="Mentalist Sravan Spotlight" className="w-full h-full object-contain filter brightness-105 contrast-110" />
             </div>
 
             <div className="lg:col-span-7 space-y-6">
@@ -448,7 +454,7 @@ export default function App() {
             <a href="#mentalist" className="block hover:text-[#C5A059] transition-colors">THE MENTALIST</a>
             <a href="#experiences" className="block hover:text-[#C5A059] transition-colors">EXPERIENCES</a>
             <a href="#historyshow" className="block hover:text-[#C5A059] transition-colors">HISTORY SHOW</a>
-            <a href="#archive" className="block hover:text-[#C5A059] transition-colors">ARCHIVE</a>
+            <a href="#portraits" className="block hover:text-[#C5A059] transition-colors">PORTRAITS</a>
             <a href="#about" className="block hover:text-[#C5A059] transition-colors">ABOUT</a>
             <a href="#booking" className="block hover:text-[#C5A059] transition-colors">BOOK</a>
           </div>

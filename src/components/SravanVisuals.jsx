@@ -2,8 +2,19 @@ import React from 'react';
 import mspLogoImg from '../assets/branding/msp_logo.png';
 import sravanTripleImg from '../assets/hero/sravan_triple_portrait.jpg';
 
+import sravanSpotlightImg from '../assets/portraits/sravan_spotlight.jpg';
+import sravanHandsSuitImg from '../assets/portraits/sravan_hands_suit.jpg';
+import sravanSideProfileImg from '../assets/portraits/sravan_side_profile.jpg';
+import sravanBalconyHarborImg from '../assets/portraits/sravan_balcony_harbor.jpg';
+import sravanNeonDuotoneImg from '../assets/portraits/sravan_neon_duotone.jpg';
+
 export const mspLogo = mspLogoImg;
 export const sravanTriple = sravanTripleImg;
+export const sravanSpotlight = sravanSpotlightImg;
+export const sravanHandsSuit = sravanHandsSuitImg;
+export const sravanSideProfile = sravanSideProfileImg;
+export const sravanBalconyHarbor = sravanBalconyHarborImg;
+export const sravanNeonDuotone = sravanNeonDuotoneImg;
 
 // Custom Instagram Camera Icon Component
 export const InstagramIcon = ({ className = "w-4 h-4" }) => (
@@ -14,7 +25,7 @@ export const InstagramIcon = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
-// Plain Logo Emblem Component (No Frame)
+// Plain Logo Emblem Component
 export const LogoEmblem = ({ className = "h-10 w-auto", showText = false }) => (
   <div className="flex items-center gap-3">
     <img
@@ -30,22 +41,29 @@ export const LogoEmblem = ({ className = "h-10 w-auto", showText = false }) => (
   </div>
 );
 
-// Plain Hero Visual: Unclipped Triple Portrait on Pure Black (No Frame/Filigree)
+// Hero Visual: Spotlight Dramatic Portrait on Pure Black
 export const HeroTriplePortraitVisual = ({ className = "" }) => (
-  <div className={`relative w-full h-full flex items-center justify-center bg-black ${className}`}>
+  <div className={`relative w-full h-full flex items-center justify-center bg-black overflow-hidden ${className}`}>
     <img
-      src={sravanTripleImg}
-      alt="Mentalist Sravan - Triple Portrait"
-      className="w-full h-full object-contain max-h-[80vh] filter brightness-105 contrast-110 transition-transform duration-700 hover:scale-[1.01]"
+      src={sravanSpotlightImg}
+      alt="Mentalist Sravan - Spotlight Portrait"
+      className="w-full h-full object-contain max-h-[80vh] filter brightness-105 contrast-110 transition-transform duration-700 hover:scale-[1.02]"
     />
   </div>
 );
 
-// Plain History Show Visual Component (No Frame)
+// History Show Visual Component
 export const HistoryShowVisual = ({ className = "" }) => (
-  <div className={`relative w-full h-80 md:h-96 bg-black p-6 overflow-hidden flex flex-col justify-between ${className}`}>
+  <div className={`relative w-full h-96 md:h-[450px] bg-black overflow-hidden flex flex-col justify-between p-6 ${className}`}>
+    <img
+      src={sravanTripleImg}
+      alt="History Show - Mentalist Sravan"
+      className="absolute inset-0 w-full h-full object-cover opacity-40 filter contrast-125 brightness-90"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/80" />
+
     {/* SVG Historic Clock / Compass Geometry */}
-    <svg viewBox="0 0 800 400" className="w-full h-full object-cover absolute inset-0 opacity-25">
+    <svg viewBox="0 0 800 400" className="w-full h-full object-cover absolute inset-0 opacity-30 pointer-events-none">
       <circle cx="400" cy="200" r="140" fill="none" stroke="#C5A059" strokeWidth="1" strokeDasharray="4 8" />
       <circle cx="400" cy="200" r="100" fill="none" stroke="#8E1018" strokeWidth="1.5" />
       <line x1="400" y1="40" x2="400" y2="360" stroke="#C5A059" strokeWidth="0.5" opacity="0.6" />
@@ -62,8 +80,8 @@ export const HistoryShowVisual = ({ className = "" }) => (
     </div>
 
     <div className="relative z-10 space-y-2 text-center max-w-xl mx-auto">
-      <span className="text-xs text-[#8E1018] tracking-[0.3em] font-cinzel uppercase block">GRAND THEATRICAL PRODUCTION</span>
-      <h3 className="text-3xl md:text-5xl font-serif text-[#F2EFE9] tracking-wider uppercase">
+      <span className="text-xs text-[#8E1018] tracking-[0.3em] font-cinzel uppercase block font-semibold">GRAND THEATRICAL PRODUCTION</span>
+      <h3 className="text-3xl md:text-5xl font-serif text-[#F2EFE9] tracking-wider uppercase drop-shadow-lg">
         HISTORY SHOW
       </h3>
       <p className="text-xs md:text-sm text-[#B8B0A5] font-light italic">
@@ -78,19 +96,27 @@ export const HistoryShowVisual = ({ className = "" }) => (
   </div>
 );
 
-// Plain Mirage Visual Component (No Frame)
+// Mirage Visual Component (Using Neon Duotone Portrait)
 export const MirageVisual = ({ className = "" }) => (
-  <div className={`relative w-full h-80 md:h-96 bg-black p-6 overflow-hidden flex flex-col justify-between ${className}`}>
-    <svg viewBox="0 0 800 400" className="w-full h-full object-cover absolute inset-0 opacity-20">
-      <polygon points="400,0 200,400 600,400" fill="#C5A059" opacity="0.08" />
-      <polygon points="400,0 320,400 480,400" fill="#8E1018" opacity="0.12" />
+  <div className={`relative w-full h-96 md:h-[450px] bg-black overflow-hidden flex flex-col justify-between p-6 ${className}`}>
+    <img
+      src={sravanNeonDuotoneImg}
+      alt="Mirage - Mentalist Sravan"
+      className="absolute inset-0 w-full h-full object-cover opacity-50 filter contrast-110 brightness-90"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
+
+    <svg viewBox="0 0 800 400" className="w-full h-full object-cover absolute inset-0 opacity-20 pointer-events-none">
+      <polygon points="400,0 200,400 600,400" fill="#C5A059" opacity="0.1" />
+      <polygon points="400,0 320,400 480,400" fill="#8E1018" opacity="0.15" />
     </svg>
+
     <div className="relative z-10 flex items-center justify-between text-xs text-[#C5A059] font-cinzel tracking-widest uppercase">
       <span>PROJECT 01 / MIRAGE</span>
       <span>THEATRE SHOW</span>
     </div>
     <div className="relative z-10 text-center space-y-2">
-      <h3 className="text-3xl md:text-5xl font-serif text-[#F2EFE9] tracking-wider uppercase">
+      <h3 className="text-3xl md:text-5xl font-serif text-[#F2EFE9] tracking-wider uppercase drop-shadow-md">
         MIRAGE
       </h3>
       <p className="text-xs text-[#B8B0A5] font-cinzel tracking-widest uppercase">
@@ -103,21 +129,29 @@ export const MirageVisual = ({ className = "" }) => (
   </div>
 );
 
-// Plain Insider Visual Component (No Frame)
+// Insider Visual Component (Using Balcony Harbor View Portrait)
 export const InsiderVisual = ({ className = "" }) => (
-  <div className={`relative w-full h-80 md:h-96 bg-black p-6 overflow-hidden flex flex-col justify-between ${className}`}>
-    <svg viewBox="0 0 800 400" className="w-full h-full object-cover absolute inset-0 opacity-25">
+  <div className={`relative w-full h-96 md:h-[450px] bg-black overflow-hidden flex flex-col justify-between p-6 ${className}`}>
+    <img
+      src={sravanBalconyHarborImg}
+      alt="Insider - Mentalist Sravan"
+      className="absolute inset-0 w-full h-full object-cover opacity-45 filter contrast-110 brightness-90"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
+
+    <svg viewBox="0 0 800 400" className="w-full h-full object-cover absolute inset-0 opacity-25 pointer-events-none">
       <line x1="0" y1="0" x2="400" y2="200" stroke="#C5A059" strokeWidth="1" opacity="0.4" />
       <line x1="800" y1="0" x2="400" y2="200" stroke="#C5A059" strokeWidth="1" opacity="0.4" />
       <line x1="0" y1="400" x2="400" y2="200" stroke="#8E1018" strokeWidth="1" opacity="0.4" />
       <line x1="800" y1="400" x2="400" y2="200" stroke="#8E1018" strokeWidth="1" opacity="0.4" />
     </svg>
+
     <div className="relative z-10 flex items-center justify-between text-xs text-[#C5A059] font-cinzel tracking-widest uppercase">
       <span>PROJECT 02 / INSIDER</span>
       <span>PSYCHOLOGICAL THRILLER</span>
     </div>
     <div className="relative z-10 text-center space-y-2">
-      <h3 className="text-3xl md:text-5xl font-serif text-[#F2EFE9] tracking-wider uppercase">
+      <h3 className="text-3xl md:text-5xl font-serif text-[#F2EFE9] tracking-wider uppercase drop-shadow-md">
         INSIDER
       </h3>
       <p className="text-xs text-[#B8B0A5] font-cinzel tracking-widest uppercase">
@@ -130,7 +164,7 @@ export const InsiderVisual = ({ className = "" }) => (
   </div>
 );
 
-// Plain Stage Performance Visual (No Frame)
+// Stage Performance Visual
 export const StagePerformanceVisual = ({ className = "" }) => (
   <div className={`relative w-full h-96 bg-black p-6 overflow-hidden flex flex-col justify-between ${className}`}>
     <div className="relative z-10 text-center my-auto space-y-4 max-w-xl mx-auto">
@@ -144,3 +178,4 @@ export const StagePerformanceVisual = ({ className = "" }) => (
     </div>
   </div>
 );
+
