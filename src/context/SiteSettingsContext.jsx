@@ -108,8 +108,8 @@ export const defaultSettings = {
   insiderVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
   mainShowreelVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
   // Razorpay Gateway Config
-  razorpayKeyId: import.meta.env.VITE_RAZORPAY_KEY_ID || '',
-  razorpayMode: 'test', // 'test' | 'live'
+  razorpayKeyId: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_TUtOXJ88N8ANSp',
+  razorpayMode: 'live', // 'test' | 'live'
   currency: 'INR',
   shows: initialShows
 };
@@ -132,9 +132,15 @@ export const SiteSettingsProvider = ({ children }) => {
       const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        const resolvedKeyId =
+          parsed.razorpayKeyId && parsed.razorpayKeyId.trim().length > 5
+            ? parsed.razorpayKeyId
+            : (import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_TUtOXJ88N8ANSp');
         return {
           ...defaultSettings,
           ...parsed,
+          razorpayKeyId: resolvedKeyId,
+          razorpayMode: parsed.razorpayMode || 'live',
           shows: parsed.shows && parsed.shows.length > 0 ? parsed.shows : initialShows
         };
       }

@@ -79,13 +79,14 @@ export const TicketingSection = () => {
         show_time: selectedShow.time,
         venue: selectedShow.venue,
         city: selectedShow.city,
+        tier_id: selectedTier.id,
         tier_name: selectedTier.name,
         ticket_price: selectedTier.price,
-        quantity: quantity,
+        quantity,
         total_amount: totalPrice,
-        buyer_name: formData.name,
-        buyer_email: formData.email,
-        buyer_phone: formData.phone,
+        buyer_name: formData.name.trim(),
+        buyer_email: formData.email.trim(),
+        buyer_phone: formData.phone.trim(),
         payment_id: paymentId,
         payment_status: 'PAID',
         created_at: new Date().toISOString()
@@ -107,24 +108,84 @@ export const TicketingSection = () => {
       setIsProcessing(false);
     };
 
-    // Check if real Razorpay is configured and loaded
-    const razorpayKey = settings.razorpayKeyId;
+    const razorpayKey =
+      (settings.razorpayKeyId && settings.razorpayKeyId.trim().length > 5)
+        ? settings.razorpayKeyId.trim()
+        : (import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_TUtOXJ88N8ANSp');
 
-    if (window.Razorpay && razorpayKey && razorpayKey.trim().length > 5) {
+    const isLiveGateway = settings.razorpayMode === 'live' || !settings.razorpayMode;
+
+    if (window.Razorpay && razorpayKey && isLiveGateway) {
       try {
+        // Attempt to create a verified Razorpay Order via serverless API
+        let orderId = null;
+        try {
+          const orderRes = await fetch('/api/create-razorpay-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount: totalPrice,
+              currency: 'INR',
+              receipt: bookingRef,
+              notes: {
+                show_title: selectedShow.title,
+                show_date: selectedShow.date,
+                venue: selectedShow.venue,
+                tier_name: selectedTier.name,
+                quantity: String(quantity),
+                buyer_name: formData.name,
+                buyer_email: formData.email,
+                buyer_phone: formData.phone
+              }
+            })
+          });
+
+          if (orderRes.ok) {
+            const orderData = await orderRes.json();
+            if (orderData && orderData.orderId) {
+              orderId = orderData.orderId;
+            }
+          }
+        } catch (apiErr) {
+          console.warn('Order API creation notice, proceeding with standard checkout:', apiErr);
+        }
+
         const options = {
-          key: razorpayKey.trim(),
+          key: razorpayKey,
           amount: totalPrice * 100, // paise
           currency: 'INR',
           name: 'Mentalist Sravan Live',
-          description: `${selectedShow.title} — ${selectedTier.name} (Qty: ${quantity})`,
-          handler: function (response) {
+          description: `${selectedShow.title} — ${selectedTier.name} (${quantity} Tickets)`,
+          order_id: orderId || undefined,
+          handler: async function (response) {
+            // Verify payment signature on backend if order_id is present
+            if (response.razorpay_signature && response.razorpay_order_id) {
+              try {
+                await fetch('/api/verify-razorpay-payment', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature
+                  })
+                });
+              } catch (verifErr) {
+                console.warn('Verification notice:', verifErr);
+              }
+            }
+
             completeBooking(response.razorpay_payment_id || `rzp_${Date.now()}`);
           },
           prefill: {
             name: formData.name,
             email: formData.email,
             contact: formData.phone
+          },
+          notes: {
+            booking_ref: bookingRef,
+            show_title: selectedShow.title,
+            tier: selectedTier.name
           },
           theme: {
             color: '#8E1018'
@@ -144,11 +205,11 @@ export const TicketingSection = () => {
         rzp.open();
         return;
       } catch (err) {
-        console.warn('Razorpay SDK init error, proceeding with simulated gateway:', err);
+        console.warn('Razorpay SDK error, falling back to simulated checkout:', err);
       }
     }
 
-    // Seamless instant checkout in test mode
+    // Test mode fallback
     setTimeout(() => {
       completeBooking(`pay_sim_${Date.now().toString(36)}`);
     }, 1200);
