@@ -23,9 +23,17 @@ import {
   Check,
   Video,
   Sparkles,
-  ArrowLeft
+  ArrowLeft,
+  Ticket,
+  CreditCard,
+  Plus,
+  Trash2,
+  Edit3,
+  Users,
+  DollarSign,
+  X
 } from 'lucide-react';
-import { useSiteSettings, defaultSettings } from '../context/SiteSettingsContext';
+import { useSiteSettings, defaultSettings, initialShows } from '../context/SiteSettingsContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { LogoEmblem } from './SravanVisuals';
 
@@ -41,10 +49,20 @@ export const AdminDashboard = () => {
   const [inputCode, setInputCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState('content'); // 'content' | 'enquiries' | 'system'
+  const [activeTab, setActiveTab] = useState('content'); // 'content' | 'enquiries' | 'ticketing' | 'system'
 
-  // Settings Hook
-  const { settings, updateSettings, resetSettings } = useSiteSettings();
+  // Settings & Shows Hook
+  const {
+    settings,
+    updateSettings,
+    resetSettings,
+    shows,
+    addShow,
+    updateShow,
+    deleteShow,
+    bookings
+  } = useSiteSettings();
+
   const [formData, setFormData] = useState(settings);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -53,6 +71,30 @@ export const AdminDashboard = () => {
   const [loadingEnquiries, setLoadingEnquiries] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('ALL');
+
+  // Ticketing & Attendees State
+  const [liveBookings, setLiveBookings] = useState(bookings || []);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [ticketSearch, setTicketSearch] = useState('');
+  const [selectedShowFilter, setSelectedShowFilter] = useState('ALL');
+  const [showModalOpen, setShowModalOpen] = useState(false);
+  const [editingShow, setEditingShow] = useState(null);
+
+  // Show Form State
+  const [showForm, setShowForm] = useState({
+    title: '',
+    subtitle: '',
+    date: '',
+    time: '',
+    venue: '',
+    city: '',
+    category: 'GRAND THEATRE',
+    status: 'AVAILABLE',
+    tiers: [
+      { id: 'tier-1', name: 'VIP Circle', price: 2999, description: 'VIP Seating', seatsAvailable: 30, seatsTotal: 30 },
+      { id: 'tier-2', name: 'General Admission', price: 999, description: 'Standard Seating', seatsAvailable: 100, seatsTotal: 100 }
+    ]
+  });
 
   // Change Access Code State
   const [currentCodeInput, setCurrentCodeInput] = useState('');
@@ -75,10 +117,8 @@ export const AdminDashboard = () => {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching enquiries:', error);
-        } else {
-          setEnquiries(data || []);
+        if (!error && data) {
+          setEnquiries(data);
         }
       }
     } catch (err) {
@@ -88,29 +128,48 @@ export const AdminDashboard = () => {
     }
   };
 
-  // Subscribe to real-time additions when authenticated on enquiries tab
-  useEffect(() => {
-    if (isAuthenticated && activeTab === 'enquiries') {
-      fetchEnquiries();
-
+  // Fetch Ticket Bookings from Supabase
+  const fetchBookings = async () => {
+    setLoadingBookings(true);
+    try {
       if (isSupabaseConfigured && supabase) {
-        const channel = supabase
-          .channel('realtime_enquiries_admin')
-          .on(
-            'postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'enquiries' },
-            (payload) => {
-              setEnquiries((prev) => [payload.new, ...prev]);
-            }
-          )
-          .subscribe();
+        const { data, error } = await supabase
+          .from('ticket_bookings')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-        return () => {
-          supabase.removeChannel(channel);
-        };
+        if (!error && data && data.length > 0) {
+          // Merge Supabase with local bookings deduplicating by booking_ref
+          const map = new Map();
+          data.forEach((b) => map.set(b.booking_ref, b));
+          (bookings || []).forEach((b) => {
+            if (!map.has(b.booking_ref)) map.set(b.booking_ref, b);
+          });
+          setLiveBookings(Array.from(map.values()));
+        } else {
+          setLiveBookings(bookings || []);
+        }
+      } else {
+        setLiveBookings(bookings || []);
+      }
+    } catch (err) {
+      setLiveBookings(bookings || []);
+    } finally {
+      setLoadingBookings(false);
+    }
+  };
+
+  // Subscribe to real-time additions when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (activeTab === 'enquiries') {
+        fetchEnquiries();
+      }
+      if (activeTab === 'ticketing') {
+        fetchBookings();
       }
     }
-  }, [isAuthenticated, activeTab]);
+  }, [isAuthenticated, activeTab, bookings]);
 
   // Login handler
   const handleLogin = (e) => {
@@ -136,7 +195,7 @@ export const AdminDashboard = () => {
 
   // Save Settings
   const handleSaveSettings = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     updateSettings(formData);
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
@@ -144,11 +203,54 @@ export const AdminDashboard = () => {
 
   // Reset to Defaults
   const handleResetSettings = () => {
-    if (window.confirm('Reset all site settings to factory defaults?')) {
+    if (window.confirm('Reset all site settings and shows to factory defaults?')) {
       resetSettings();
       setFormData(defaultSettings);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
+    }
+  };
+
+  // Open Show Modal for Add / Edit
+  const handleOpenShowModal = (show = null) => {
+    if (show) {
+      setEditingShow(show);
+      setShowForm({ ...show });
+    } else {
+      setEditingShow(null);
+      setShowForm({
+        title: '',
+        subtitle: '',
+        date: '',
+        time: '',
+        venue: '',
+        city: '',
+        category: 'GRAND THEATRE',
+        status: 'AVAILABLE',
+        tiers: [
+          { id: `tier-${Date.now()}-1`, name: 'VIP Circle', price: 2999, description: 'VIP front row seating', seatsAvailable: 30, seatsTotal: 30 },
+          { id: `tier-${Date.now()}-2`, name: 'General Admission', price: 999, description: 'General seating', seatsAvailable: 100, seatsTotal: 100 }
+        ]
+      });
+    }
+    setShowModalOpen(true);
+  };
+
+  // Save Show (Create / Update)
+  const handleSaveShow = (e) => {
+    e.preventDefault();
+    if (editingShow) {
+      updateShow(editingShow.id, showForm);
+    } else {
+      addShow(showForm);
+    }
+    setShowModalOpen(false);
+  };
+
+  // Delete Show
+  const handleDeleteShow = (showId) => {
+    if (window.confirm('Are you sure you want to remove this show from the schedule?')) {
+      deleteShow(showId);
     }
   };
 
@@ -177,46 +279,72 @@ export const AdminDashboard = () => {
     setTimeout(() => setCodeChangeSuccess(false), 4000);
   };
 
-  // Export Enquiries as CSV
-  const handleExportCSV = () => {
-    if (enquiries.length === 0) return;
+  // Export Attendees CSV
+  const handleExportAttendeesCSV = () => {
+    if (liveBookings.length === 0) return;
 
-    const headers = ['ID', 'Date', 'Name', 'Email', 'Phone', 'Event Type', 'Proposed Date', 'Location', 'Message'];
-    const rows = enquiries.map((e) => [
-      e.id,
-      new Date(e.created_at).toLocaleString(),
-      `"${(e.name || '').replace(/"/g, '""')}"`,
-      `"${(e.email || '').replace(/"/g, '""')}"`,
-      `"${(e.phone || '').replace(/"/g, '""')}"`,
-      `"${(e.event_type || '').replace(/"/g, '""')}"`,
-      `"${(e.date || '').replace(/"/g, '""')}"`,
-      `"${(e.location || '').replace(/"/g, '""')}"`,
-      `"${(e.message || '').replace(/"/g, '""')}"`
+    const headers = [
+      'Booking Ref',
+      'Booking Date',
+      'Guest Name',
+      'Email',
+      'Phone',
+      'Show Title',
+      'Show Date',
+      'Show Time',
+      'Venue',
+      'City',
+      'Tier',
+      'Quantity',
+      'Total Paid (INR)',
+      'Payment ID',
+      'Status'
+    ];
+
+    const rows = liveBookings.map((b) => [
+      b.booking_ref,
+      new Date(b.created_at || Date.now()).toLocaleString(),
+      `"${(b.buyer_name || '').replace(/"/g, '""')}"`,
+      `"${(b.buyer_email || '').replace(/"/g, '""')}"`,
+      `"${(b.buyer_phone || '').replace(/"/g, '""')}"`,
+      `"${(b.show_title || '').replace(/"/g, '""')}"`,
+      `"${(b.show_date || '').replace(/"/g, '""')}"`,
+      `"${(b.show_time || '').replace(/"/g, '""')}"`,
+      `"${(b.venue || '').replace(/"/g, '""')}"`,
+      `"${(b.city || '').replace(/"/g, '""')}"`,
+      `"${(b.tier_name || '').replace(/"/g, '""')}"`,
+      b.quantity,
+      b.total_amount,
+      b.payment_id,
+      b.payment_status || 'PAID'
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Mentalist_Sravan_Enquiries_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `Mentalist_Sravan_Attendees_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Filtered enquiries
-  const filteredEnquiries = enquiries.filter((e) => {
+  // Filtered Attendees
+  const filteredBookings = liveBookings.filter((b) => {
     const matchesSearch =
-      (e.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (e.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (e.phone || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (e.location || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (e.message || '').toLowerCase().includes(searchTerm.toLowerCase());
+      (b.buyer_name || '').toLowerCase().includes(ticketSearch.toLowerCase()) ||
+      (b.buyer_email || '').toLowerCase().includes(ticketSearch.toLowerCase()) ||
+      (b.buyer_phone || '').toLowerCase().includes(ticketSearch.toLowerCase()) ||
+      (b.booking_ref || '').toLowerCase().includes(ticketSearch.toLowerCase()) ||
+      (b.show_title || '').toLowerCase().includes(ticketSearch.toLowerCase());
 
-    const matchesType = filterType === 'ALL' || e.event_type === filterType;
-
-    return matchesSearch && matchesType;
+    const matchesShow = selectedShowFilter === 'ALL' || b.show_id === selectedShowFilter;
+    return matchesSearch && matchesShow;
   });
+
+  // Calculate ticketing revenue
+  const totalRevenue = liveBookings.reduce((sum, b) => sum + (Number(b.total_amount) || 0), 0);
+  const totalTicketsSold = liveBookings.reduce((sum, b) => sum + (Number(b.quantity) || 0), 0);
 
   // =========================================================================
   // VIEW 1: ACCESS CODE LOCK SCREEN (When Not Authenticated)
@@ -225,7 +353,6 @@ export const AdminDashboard = () => {
     return (
       <div className="min-h-screen w-full bg-black text-[#F2EFE9] flex flex-col items-center justify-center p-6 selection:bg-[#8E1018] selection:text-[#F2EFE9]">
         <div className="w-full max-w-md bg-[#0a0a0a] border border-white/15 p-8 sm:p-10 shadow-2xl relative">
-          {/* Brand header */}
           <div className="text-center space-y-3 mb-8">
             <div className="w-12 h-12 rounded-full bg-[#C5A059]/10 border border-[#C5A059]/30 flex items-center justify-center mx-auto text-[#C5A059]">
               <Lock className="w-5 h-5" />
@@ -238,12 +365,11 @@ export const AdminDashboard = () => {
                 MANAGEMENT ACCESS
               </h2>
               <p className="text-xs text-[#B8B0A5] font-light">
-                Enter your private access code to manage live website settings.
+                Enter your private access code to manage live website settings and ticketing.
               </p>
             </div>
           </div>
 
-          {/* Access Code Form */}
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
@@ -284,7 +410,6 @@ export const AdminDashboard = () => {
             </button>
           </form>
 
-          {/* Exit Link */}
           <div className="mt-8 pt-6 border-t border-white/10 text-center">
             <a
               href="/"
@@ -313,12 +438,11 @@ export const AdminDashboard = () => {
                 MENTALIST SRAVAN
               </h1>
               <span className="text-[10px] font-cinzel tracking-[0.25em] text-[#C5A059] uppercase block">
-                ADMINISTRATION &amp; LIVE CONTROLS
+                ADMINISTRATION &amp; BOX OFFICE
               </span>
             </div>
           </div>
 
-          {/* Header Action Buttons */}
           <div className="flex items-center gap-3">
             <a
               href="/"
@@ -350,6 +474,21 @@ export const AdminDashboard = () => {
             <Sliders className="w-4 h-4" /> LIVE CONTENT &amp; SETTINGS
           </button>
           <button
+            onClick={() => setActiveTab('ticketing')}
+            className={`py-2 px-3 text-xs font-cinzel tracking-[0.2em] uppercase transition-colors flex items-center gap-2 border-b-2 whitespace-nowrap cursor-pointer ${
+              activeTab === 'ticketing'
+                ? 'border-[#C5A059] text-[#C5A059] font-bold'
+                : 'border-transparent text-[#B8B0A5] hover:text-[#F2EFE9]'
+            }`}
+          >
+            <Ticket className="w-4 h-4 text-[#C5A059]" /> SHOWS &amp; TICKETING{' '}
+            {liveBookings.length > 0 && (
+              <span className="bg-[#C5A059] text-black text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold">
+                {liveBookings.length}
+              </span>
+            )}
+          </button>
+          <button
             onClick={() => setActiveTab('enquiries')}
             className={`py-2 px-3 text-xs font-cinzel tracking-[0.2em] uppercase transition-colors flex items-center gap-2 border-b-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'enquiries'
@@ -372,7 +511,7 @@ export const AdminDashboard = () => {
                 : 'border-transparent text-[#B8B0A5] hover:text-[#F2EFE9]'
             }`}
           >
-            <Key className="w-4 h-4" /> ACCESS CODE &amp; SYSTEM
+            <Key className="w-4 h-4" /> ACCESS CODE &amp; GATEWAY
           </button>
         </div>
       </header>
@@ -415,7 +554,7 @@ export const AdminDashboard = () => {
             {saveSuccess && (
               <div className="p-4 bg-[#C5A059]/10 border border-[#C5A059] text-xs text-[#C5A059] flex items-center gap-2 font-cinzel tracking-wider uppercase animate-[fadeIn_0.2s_ease-out]">
                 <CheckCircle2 className="w-4 h-4" />
-                Live changes published successfully! Visiting the site will now reflect these updates.
+                Live changes published successfully!
               </div>
             )}
 
@@ -426,9 +565,6 @@ export const AdminDashboard = () => {
                   <h3 className="text-lg font-serif uppercase tracking-wider text-[#F2EFE9] flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#C5A059]" /> 01 / HERO &amp; HEADER MESSAGING
                   </h3>
-                  <span className="text-[10px] font-cinzel tracking-widest text-[#C5A059] uppercase">
-                    HOMEPAGE ABOVE THE FOLD
-                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -446,7 +582,7 @@ export const AdminDashboard = () => {
 
                   <div>
                     <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
-                      HERO TAGLINE (SIGNATURE STATEMENT)
+                      HERO TAGLINE
                     </label>
                     <input
                       type="text"
@@ -468,21 +604,9 @@ export const AdminDashboard = () => {
                     className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors resize-none"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
-                    BOOKING BADGE TEXT
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.bookingBadge}
-                    onChange={(e) => setFormData({ ...formData, bookingBadge: e.target.value })}
-                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
-                  />
-                </div>
               </div>
 
-              {/* Section: Announcement Banner */}
+              {/* Section: Top Announcement Banner */}
               <div className="bg-[#0a0a0a] border border-white/15 p-6 md:p-8 space-y-6">
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
                   <h3 className="text-lg font-serif uppercase tracking-wider text-[#F2EFE9] flex items-center gap-2">
@@ -524,69 +648,7 @@ export const AdminDashboard = () => {
                       type="text"
                       value={formData.announcementLink}
                       onChange={(e) => setFormData({ ...formData, announcementLink: e.target.value })}
-                      placeholder="#booking or https://..."
-                      className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Section: Media & Showreel Stream URLs */}
-              <div className="bg-[#0a0a0a] border border-white/15 p-6 md:p-8 space-y-6">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <h3 className="text-lg font-serif uppercase tracking-wider text-[#F2EFE9] flex items-center gap-2">
-                    <Video className="w-4 h-4 text-[#C5A059]" /> 03 / STREAMING SHOWREEL &amp; PRODUCTION VIDEO LINKS
-                  </h3>
-                  <span className="text-[10px] font-cinzel tracking-widest text-[#C5A059] uppercase">
-                    MP4 DIRECT STREAM URLS
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
-                      MAIN SHOWREEL VIDEO URL
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.mainShowreelVideo}
-                      onChange={(e) => setFormData({ ...formData, mainShowreelVideo: e.target.value })}
-                      className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
-                      HISTORY SHOW TRAILER URL
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.historyShowVideo}
-                      onChange={(e) => setFormData({ ...formData, historyShowVideo: e.target.value })}
-                      className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
-                      MIRAGE TRAILER URL
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.mirageVideo}
-                      onChange={(e) => setFormData({ ...formData, mirageVideo: e.target.value })}
-                      className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
-                      INSIDER TRAILER URL
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.insiderVideo}
-                      onChange={(e) => setFormData({ ...formData, insiderVideo: e.target.value })}
+                      placeholder="#tickets or https://..."
                       className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
                     />
                   </div>
@@ -598,10 +660,10 @@ export const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-serif uppercase tracking-wider text-[#F2EFE9]">
-                      04 / OPENING SEQUENCE ANIMATION
+                      03 / OPENING SEQUENCE ANIMATION
                     </h3>
                     <p className="text-xs text-[#B8B0A5] font-light">
-                      Enable or disable the 300-frame theatrical corridor loading animation when visitors enter the website.
+                      Toggle the 300-frame theatrical corridor loading animation when visitors enter the site.
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -632,7 +694,243 @@ export const AdminDashboard = () => {
         )}
 
         {/* ===============================================================
-            TAB 2: REALTIME ENQUIRIES CRM
+            TAB 2: SHOWS & TICKETING (RAZORPAY)
+        =============================================================== */}
+        {activeTab === 'ticketing' && (
+          <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-serif uppercase tracking-wider text-[#F2EFE9]">
+                  SHOWS &amp; TICKETING SYSTEM
+                </h2>
+                <p className="text-xs text-[#B8B0A5] font-light">
+                  Manage theatrical tour dates, ticket tiers, prices, and attendee registrations via Razorpay.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOpenShowModal(null)}
+                  className="px-5 py-2.5 bg-[#C5A059] hover:bg-[#8E1018] text-black hover:text-[#F2EFE9] font-cinzel text-xs tracking-widest uppercase font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  <Plus className="w-4 h-4" /> ADD NEW SHOW
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportAttendeesCSV}
+                  disabled={liveBookings.length === 0}
+                  className="px-5 py-2.5 bg-[#F2EFE9] hover:bg-[#C5A059] text-black font-cinzel text-xs tracking-widest uppercase font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 shadow-md"
+                >
+                  <Download className="w-3.5 h-3.5" /> EXPORT ATTENDEES
+                </button>
+              </div>
+            </div>
+
+            {/* Metrics Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="bg-[#0a0a0a] border border-white/10 p-4 text-center">
+                <span className="text-2xl font-serif font-bold text-[#C5A059] block">
+                  ₹{totalRevenue.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase">
+                  TOTAL TICKET REVENUE
+                </span>
+              </div>
+              <div className="bg-[#0a0a0a] border border-white/10 p-4 text-center">
+                <span className="text-2xl font-serif font-bold text-[#F2EFE9] block">
+                  {totalTicketsSold}
+                </span>
+                <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase">
+                  TICKETS BOOKED
+                </span>
+              </div>
+              <div className="bg-[#0a0a0a] border border-white/10 p-4 text-center">
+                <span className="text-2xl font-serif font-bold text-[#F2EFE9] block">
+                  {shows.length}
+                </span>
+                <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase">
+                  SCHEDULED SHOWS
+                </span>
+              </div>
+              <div className="bg-[#0a0a0a] border border-white/10 p-4 text-center">
+                <span className="text-2xl font-serif font-bold text-[#8E1018] block">
+                  {formData.razorpayMode === 'live' ? 'LIVE' : 'TEST'}
+                </span>
+                <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase">
+                  GATEWAY STATUS
+                </span>
+              </div>
+            </div>
+
+            {/* Shows List Manager */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 className="text-lg font-serif uppercase tracking-wider text-[#F2EFE9] flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#C5A059]" /> SCHEDULED THEATRICAL PRODUCTIONS
+                </h3>
+                <span className="text-[10px] font-cinzel tracking-widest text-[#C5A059] uppercase">
+                  LIVE ON PUBLIC SITE
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                {shows.map((show) => (
+                  <div
+                    key={show.id}
+                    className="bg-[#0a0a0a] border border-white/15 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-[#C5A059]/50 transition-all"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg font-serif font-bold uppercase text-[#F2EFE9]">
+                          {show.title}
+                        </span>
+                        <span
+                          className={`text-[9px] font-cinzel tracking-widest px-2.5 py-0.5 uppercase font-bold ${
+                            show.status === 'AVAILABLE'
+                              ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                              : show.status === 'SELLING FAST'
+                              ? 'bg-[#8E1018] text-[#F2EFE9]'
+                              : 'bg-white/10 text-white/50'
+                          }`}
+                        >
+                          {show.status}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-[#B8B0A5]">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-[#C5A059]" /> {show.date} • {show.time}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-[#C5A059]" /> {show.venue}, {show.city}
+                        </span>
+                      </div>
+
+                      {/* Tiers summary */}
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        {show.tiers?.map((t) => (
+                          <span
+                            key={t.id}
+                            className="text-[10px] font-mono bg-black border border-white/10 px-2 py-0.5 text-[#F2EFE9]"
+                          >
+                            {t.name}: <strong className="text-[#C5A059]">₹{t.price}</strong>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <button
+                        onClick={() => handleOpenShowModal(show)}
+                        className="px-4 py-2 border border-white/20 hover:border-[#C5A059] text-xs font-cinzel tracking-widest uppercase text-[#F2EFE9] hover:text-[#C5A059] transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" /> EDIT SHOW
+                      </button>
+                      <button
+                        onClick={() => handleDeleteShow(show.id)}
+                        className="p-2 border border-[#8E1018]/40 hover:bg-[#8E1018] text-[#8E1018] hover:text-[#F2EFE9] transition-all cursor-pointer"
+                        title="Delete Show"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Booked Attendees CRM Table */}
+            <div className="space-y-4 pt-6 border-t border-white/10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[#C5A059]" />
+                  <h3 className="text-lg font-serif uppercase tracking-wider text-[#F2EFE9]">
+                    ATTENDEE ROSTER &amp; DOOR CHECK-IN ({filteredBookings.length})
+                  </h3>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="relative w-full sm:w-64">
+                    <Search className="w-4 h-4 text-[#B8B0A5] absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={ticketSearch}
+                      onChange={(e) => setTicketSearch(e.target.value)}
+                      placeholder="Search guest, ref, email..."
+                      className="w-full bg-black border border-white/15 focus:border-[#C5A059] text-[#F2EFE9] pl-9 pr-4 py-2 text-xs tracking-wider outline-none"
+                    />
+                  </div>
+                  <button
+                    onClick={fetchBookings}
+                    className="p-2 text-[#B8B0A5] hover:text-[#F2EFE9] border border-white/15 cursor-pointer"
+                    title="Refresh Bookings"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${loadingBookings ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              {filteredBookings.length === 0 ? (
+                <div className="text-center py-12 bg-[#0a0a0a] border border-white/10 text-xs text-[#B8B0A5]">
+                  No tickets booked yet. Confirmed Razorpay ticket bookings will show up here in real-time.
+                </div>
+              ) : (
+                <div className="bg-[#0a0a0a] border border-white/15 overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-black text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase border-b border-white/15">
+                      <tr>
+                        <th className="p-3.5">REF ID</th>
+                        <th className="p-3.5">GUEST NAME</th>
+                        <th className="p-3.5">CONTACT</th>
+                        <th className="p-3.5">SHOW</th>
+                        <th className="p-3.5">SEATING TIER</th>
+                        <th className="p-3.5">QTY</th>
+                        <th className="p-3.5">AMOUNT</th>
+                        <th className="p-3.5">PAYMENT ID</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/10 font-sans-body">
+                      {filteredBookings.map((b) => (
+                        <tr key={b.booking_ref} className="hover:bg-white/5 transition-colors">
+                          <td className="p-3.5 font-mono text-[11px] text-[#C5A059]">
+                            {b.booking_ref}
+                          </td>
+                          <td className="p-3.5 font-serif font-bold text-[#F2EFE9]">
+                            {b.buyer_name}
+                          </td>
+                          <td className="p-3.5 text-xs text-[#B8B0A5]">
+                            <div>{b.buyer_email}</div>
+                            <div className="font-mono text-[11px] text-[#F2EFE9]">{b.buyer_phone}</div>
+                          </td>
+                          <td className="p-3.5 font-serif text-[#F2EFE9]">
+                            {b.show_title}
+                          </td>
+                          <td className="p-3.5 text-[#B8B0A5]">
+                            {b.tier_name}
+                          </td>
+                          <td className="p-3.5 font-mono font-bold text-[#F2EFE9]">
+                            {b.quantity}
+                          </td>
+                          <td className="p-3.5 font-mono text-[#C5A059] font-bold">
+                            ₹{Number(b.total_amount || 0).toLocaleString()}
+                          </td>
+                          <td className="p-3.5 font-mono text-[10px] text-[#B8B0A5] truncate max-w-[120px]">
+                            {b.payment_id}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ===============================================================
+            TAB 3: REALTIME ENQUIRIES CRM
         =============================================================== */}
         {activeTab === 'enquiries' && (
           <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
@@ -655,309 +953,451 @@ export const AdminDashboard = () => {
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${loadingEnquiries ? 'animate-spin' : ''}`} /> REFRESH
                 </button>
-                <button
-                  type="button"
-                  onClick={handleExportCSV}
-                  disabled={enquiries.length === 0}
-                  className="px-5 py-2.5 bg-[#F2EFE9] hover:bg-[#C5A059] text-black font-cinzel text-xs tracking-widest uppercase font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 shadow-md"
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {enquiries.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-[#0a0a0a] border border-white/15 p-6 hover:border-[#C5A059]/50 transition-all space-y-4"
                 >
-                  <Download className="w-3.5 h-3.5" /> EXPORT CSV
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-[#0a0a0a] border border-white/10 p-4 text-center">
-                <span className="text-2xl font-serif font-bold text-[#C5A059] block">
-                  {enquiries.length}
-                </span>
-                <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase">
-                  TOTAL ENQUIRIES
-                </span>
-              </div>
-              <div className="bg-[#0a0a0a] border border-white/10 p-4 text-center">
-                <span className="text-2xl font-serif font-bold text-[#F2EFE9] block">
-                  {enquiries.filter((e) => e.event_type?.includes('Theatrical')).length}
-                </span>
-                <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase">
-                  THEATRICAL
-                </span>
-              </div>
-              <div className="bg-[#0a0a0a] border border-white/10 p-4 text-center">
-                <span className="text-2xl font-serif font-bold text-[#F2EFE9] block">
-                  {enquiries.filter((e) => e.event_type?.includes('Private')).length}
-                </span>
-                <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase">
-                  PRIVATE EVENTS
-                </span>
-              </div>
-              <div className="bg-[#0a0a0a] border border-white/10 p-4 text-center">
-                <span className="text-2xl font-serif font-bold text-[#8E1018] block">
-                  {enquiries.filter((e) => e.phone).length}
-                </span>
-                <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase">
-                  WITH PHONE NUMBERS
-                </span>
-              </div>
-            </div>
-
-            {/* Search & Filter Bar */}
-            <div className="bg-[#0a0a0a] border border-white/15 p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="relative w-full md:w-96">
-                <Search className="w-4 h-4 text-[#B8B0A5] absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name, email, phone, location..."
-                  className="w-full bg-black border border-white/15 focus:border-[#C5A059] text-[#F2EFE9] pl-9 pr-4 py-2.5 text-xs tracking-wider outline-none transition-colors"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
-                {['ALL', 'Theatrical Engagement', 'Private Experience', 'Exclusive Gathering', 'Festival / Cultural Stage'].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setFilterType(type)}
-                    className={`px-3 py-1.5 text-[10px] font-cinzel tracking-widest uppercase transition-all whitespace-nowrap rounded-sm cursor-pointer ${
-                      filterType === type
-                        ? 'bg-[#C5A059] text-black font-bold'
-                        : 'text-[#B8B0A5] hover:text-[#F2EFE9] border border-white/10'
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Enquiries List */}
-            {loadingEnquiries ? (
-              <div className="text-center py-16 space-y-3 bg-[#0a0a0a] border border-white/10">
-                <RefreshCw className="w-8 h-8 text-[#C5A059] animate-spin mx-auto" />
-                <p className="text-xs font-cinzel tracking-widest text-[#B8B0A5] uppercase">
-                  FETCHING LIVE ENQUIRIES FROM SUPABASE...
-                </p>
-              </div>
-            ) : filteredEnquiries.length === 0 ? (
-              <div className="text-center py-16 space-y-3 bg-[#0a0a0a] border border-white/10">
-                <Inbox className="w-10 h-10 text-[#B8B0A5]/40 mx-auto" />
-                <p className="text-sm font-serif text-[#F2EFE9] uppercase">
-                  NO ENQUIRIES FOUND
-                </p>
-                <p className="text-xs text-[#B8B0A5] max-w-sm mx-auto">
-                  {searchTerm ? 'No submissions match your search query.' : 'Submissions through the booking form will show up here in real-time.'}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredEnquiries.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-[#0a0a0a] border border-white/15 p-6 hover:border-[#C5A059]/50 transition-all space-y-4 relative group"
-                  >
-                    {/* Header line */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg font-serif text-[#F2EFE9] font-bold tracking-wider">
-                          {item.name}
-                        </span>
-                        <span className="bg-[#C5A059]/15 text-[#C5A059] border border-[#C5A059]/30 text-[9px] font-cinzel tracking-widest px-2.5 py-0.5 uppercase">
-                          {item.event_type || 'Enquiry'}
-                        </span>
-                      </div>
-                      <span className="text-[11px] font-mono text-[#B8B0A5]">
-                        {new Date(item.created_at).toLocaleString()}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-serif text-[#F2EFE9] font-bold tracking-wider">
+                        {item.name}
+                      </span>
+                      <span className="bg-[#C5A059]/15 text-[#C5A059] border border-[#C5A059]/30 text-[9px] font-cinzel tracking-widest px-2.5 py-0.5 uppercase">
+                        {item.event_type || 'Enquiry'}
                       </span>
                     </div>
+                    <span className="text-[11px] font-mono text-[#B8B0A5]">
+                      {new Date(item.created_at).toLocaleString()}
+                    </span>
+                  </div>
 
-                    {/* Contact & Event Details */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
-                        <a
-                          href={`mailto:${item.email}`}
-                          className="text-[#F2EFE9] hover:text-[#C5A059] transition-colors underline truncate"
-                        >
-                          {item.email}
-                        </a>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
-                        <a
-                          href={`tel:${item.phone}`}
-                          className="text-[#F2EFE9] hover:text-[#C5A059] transition-colors font-mono"
-                        >
-                          {item.phone}
-                        </a>
-                      </div>
-
-                      {item.date && (
-                        <div className="flex items-center gap-2 text-[#B8B0A5]">
-                          <Calendar className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
-                          <span>Date: {item.date}</span>
-                        </div>
-                      )}
-
-                      {item.location && (
-                        <div className="flex items-center gap-2 text-[#B8B0A5]">
-                          <MapPin className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
-                          <span>{item.location}</span>
-                        </div>
-                      )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                      <a href={`mailto:${item.email}`} className="text-[#F2EFE9] hover:text-[#C5A059] underline truncate">
+                        {item.email}
+                      </a>
                     </div>
-
-                    {/* Message Body */}
-                    {item.message && (
-                      <div className="bg-black/60 border border-white/10 p-3.5 text-xs text-[#B8B0A5] leading-relaxed font-light">
-                        <span className="text-[9px] font-cinzel tracking-widest text-[#C5A059] uppercase block mb-1">
-                          MESSAGE:
-                        </span>
-                        {item.message}
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                      <a href={`tel:${item.phone}`} className="text-[#F2EFE9] hover:text-[#C5A059] font-mono">
+                        {item.phone}
+                      </a>
+                    </div>
+                    {item.date && (
+                      <div className="flex items-center gap-2 text-[#B8B0A5]">
+                        <Calendar className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                        <span>Date: {item.date}</span>
                       </div>
                     )}
-
-                    {/* Direct Contact Actions */}
-                    <div className="pt-2 flex flex-wrap items-center gap-3">
-                      <a
-                        href={`tel:${item.phone}`}
-                        className="px-3.5 py-1.5 bg-[#8E1018] hover:bg-[#a6131c] text-[#F2EFE9] text-[10px] font-cinzel tracking-widest uppercase flex items-center gap-1.5 transition-colors"
-                      >
-                        <Phone className="w-3 h-3" /> CALL NOW
-                      </a>
-                      <a
-                        href={`mailto:${item.email}?subject=Regarding%20Your%20Mentalist%20Sravan%20Enquiry`}
-                        className="px-3.5 py-1.5 border border-white/20 hover:border-white text-[#F2EFE9] text-[10px] font-cinzel tracking-widest uppercase flex items-center gap-1.5 transition-colors"
-                      >
-                        <Mail className="w-3 h-3" /> EMAIL CLIENT
-                      </a>
-                    </div>
+                    {item.location && (
+                      <div className="flex items-center gap-2 text-[#B8B0A5]">
+                        <MapPin className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                        <span>{item.location}</span>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {item.message && (
+                    <div className="bg-black/60 border border-white/10 p-3.5 text-xs text-[#B8B0A5] leading-relaxed font-light">
+                      <span className="text-[9px] font-cinzel tracking-widest text-[#C5A059] uppercase block mb-1">
+                        MESSAGE:
+                      </span>
+                      {item.message}
+                    </div>
+                  )}
+
+                  <div className="pt-2 flex flex-wrap items-center gap-3">
+                    <a
+                      href={`tel:${item.phone}`}
+                      className="px-3.5 py-1.5 bg-[#8E1018] hover:bg-[#a6131c] text-[#F2EFE9] text-[10px] font-cinzel tracking-widest uppercase flex items-center gap-1.5 transition-colors"
+                    >
+                      <Phone className="w-3 h-3" /> CALL NOW
+                    </a>
+                    <a
+                      href={`mailto:${item.email}?subject=Regarding%20Your%20Mentalist%20Sravan%20Enquiry`}
+                      className="px-3.5 py-1.5 border border-white/20 hover:border-white text-[#F2EFE9] text-[10px] font-cinzel tracking-widest uppercase flex items-center gap-1.5 transition-colors"
+                    >
+                      <Mail className="w-3 h-3" /> EMAIL CLIENT
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {/* ===============================================================
-            TAB 3: SYSTEM & ACCESS CODE
+            TAB 4: ACCESS CODE & GATEWAY SYSTEM
         =============================================================== */}
         {activeTab === 'system' && (
           <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
             <div className="border-b border-white/10 pb-6">
               <h2 className="text-2xl md:text-3xl font-serif uppercase tracking-wider text-[#F2EFE9]">
-                ACCESS CODE &amp; SYSTEM HEALTH
+                ACCESS CODE &amp; PAYMENT GATEWAY
               </h2>
               <p className="text-xs text-[#B8B0A5] font-light">
-                Configure your private dashboard passcode and verify database connectivity.
+                Configure your Razorpay merchant keys, gateway modes, and portal access code.
               </p>
             </div>
 
-            {/* Change Access Code Card */}
-            <div className="bg-[#0a0a0a] border border-white/15 p-6 md:p-8 space-y-6 max-w-xl">
-              <div className="flex items-center gap-2 text-lg font-serif uppercase tracking-wider text-[#F2EFE9] border-b border-white/10 pb-4">
-                <Key className="w-5 h-5 text-[#C5A059]" /> CHANGE ACCESS CODE
-              </div>
-
-              <form onSubmit={handleUpdateCode} className="space-y-4">
-                <div>
-                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
-                    CURRENT ACCESS CODE
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={currentCodeInput}
-                    onChange={(e) => setCurrentCodeInput(e.target.value)}
-                    placeholder="Enter current passcode"
-                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
-                  />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Razorpay Gateway Configuration */}
+              <div className="bg-[#0a0a0a] border border-white/15 p-6 md:p-8 space-y-6">
+                <div className="flex items-center gap-2 text-lg font-serif uppercase tracking-wider text-[#F2EFE9] border-b border-white/10 pb-4">
+                  <CreditCard className="w-5 h-5 text-[#C5A059]" /> RAZORPAY PAYMENT GATEWAY
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
-                    NEW ACCESS CODE
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newCodeInput}
-                    onChange={(e) => setNewCodeInput(e.target.value)}
-                    placeholder="Enter new passcode (min 4 chars)"
-                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
-                  />
-                </div>
-
-                {codeChangeError && (
-                  <div className="p-3 bg-[#8E1018]/20 border border-[#8E1018]/50 text-xs text-[#F2EFE9] flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-[#8E1018] shrink-0" />
-                    <span>{codeChangeError}</span>
+                <div className="space-y-4 text-xs">
+                  <div>
+                    <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2 font-semibold">
+                      RAZORPAY KEY ID
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.razorpayKeyId}
+                      onChange={(e) => setFormData({ ...formData, razorpayKeyId: e.target.value })}
+                      placeholder="e.g. rzp_test_... or rzp_live_..."
+                      className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors font-mono"
+                    />
+                    <span className="text-[10px] text-[#B8B0A5] mt-1 block">
+                      Found in Razorpay Dashboard &gt; Settings &gt; API Keys.
+                    </span>
                   </div>
-                )}
 
-                {codeChangeSuccess && (
-                  <div className="p-3 bg-[#C5A059]/20 border border-[#C5A059]/50 text-xs text-[#C5A059] flex items-center gap-2 font-cinzel tracking-wider uppercase">
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                    <span>Access code updated successfully!</span>
+                  <div>
+                    <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2 font-semibold">
+                      GATEWAY OPERATING MODE
+                    </label>
+                    <select
+                      value={formData.razorpayMode}
+                      onChange={(e) => setFormData({ ...formData, razorpayMode: e.target.value })}
+                      className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
+                    >
+                      <option value="test">Test Mode (Sandbox / Demo Payments)</option>
+                      <option value="live">Live Production (Real Money Processing)</option>
+                    </select>
                   </div>
-                )}
 
-                <button
-                  type="submit"
-                  className="w-full py-3 bg-[#C5A059] hover:bg-[#8E1018] text-black hover:text-[#F2EFE9] font-cinzel text-xs tracking-[0.2em] uppercase font-bold transition-all cursor-pointer"
-                >
-                  SAVE NEW ACCESS CODE
-                </button>
-              </form>
-            </div>
-
-            {/* Supabase Connection Details */}
-            <div className="bg-[#0a0a0a] border border-white/15 p-6 md:p-8 space-y-4 max-w-xl">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div className="flex items-center gap-2 text-lg font-serif uppercase tracking-wider text-[#F2EFE9]">
-                  <ShieldCheck className="w-5 h-5 text-[#C5A059]" /> DATABASE STATUS
-                </div>
-                <span className="flex items-center gap-1.5 text-[10px] font-cinzel tracking-widest text-[#C5A059] uppercase">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> CONNECTED
-                </span>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div>
-                  <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase block mb-1">
-                    PROJECT ENDPOINT
-                  </span>
-                  <div className="bg-black p-2.5 font-mono text-[11px] text-[#F2EFE9] border border-white/10 truncate">
-                    https://ivmeaeptqqjthbcwuhhr.supabase.co
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase block mb-1">
-                    TARGET TABLE
-                  </span>
-                  <div className="bg-black p-2.5 font-mono text-[11px] text-[#F2EFE9] border border-white/10">
-                    public.enquiries
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <a
-                    href="https://supabase.com/dashboard/project/ivmeaeptqqjthbcwuhhr"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs font-cinzel tracking-widest text-[#C5A059] hover:text-[#F2EFE9] uppercase border-b border-[#C5A059] pb-0.5 transition-colors"
+                  <button
+                    type="button"
+                    onClick={handleSaveSettings}
+                    className="w-full py-3 bg-[#C5A059] hover:bg-[#8E1018] text-black hover:text-[#F2EFE9] font-cinzel text-xs tracking-[0.2em] uppercase font-bold transition-all cursor-pointer"
                   >
-                    OPEN SUPABASE DASHBOARD ↗
-                  </a>
+                    SAVE RAZORPAY CONFIGURATION
+                  </button>
                 </div>
+              </div>
+
+              {/* Change Access Code Card */}
+              <div className="bg-[#0a0a0a] border border-white/15 p-6 md:p-8 space-y-6">
+                <div className="flex items-center gap-2 text-lg font-serif uppercase tracking-wider text-[#F2EFE9] border-b border-white/10 pb-4">
+                  <Key className="w-5 h-5 text-[#C5A059]" /> CHANGE ADMIN PASSCODE
+                </div>
+
+                <form onSubmit={handleUpdateCode} className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
+                      CURRENT ACCESS CODE
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={currentCodeInput}
+                      onChange={(e) => setCurrentCodeInput(e.target.value)}
+                      placeholder="Enter current passcode"
+                      className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-2">
+                      NEW ACCESS CODE
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newCodeInput}
+                      onChange={(e) => setNewCodeInput(e.target.value)}
+                      placeholder="Enter new passcode (min 4 chars)"
+                      className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
+                    />
+                  </div>
+
+                  {codeChangeError && (
+                    <div className="p-3 bg-[#8E1018]/20 border border-[#8E1018]/50 text-xs text-[#F2EFE9] flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-[#8E1018] shrink-0" />
+                      <span>{codeChangeError}</span>
+                    </div>
+                  )}
+
+                  {codeChangeSuccess && (
+                    <div className="p-3 bg-[#C5A059]/20 border border-[#C5A059]/50 text-xs text-[#C5A059] flex items-center gap-2 font-cinzel tracking-wider uppercase">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>Access code updated successfully!</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-[#C5A059] hover:bg-[#8E1018] text-black hover:text-[#F2EFE9] font-cinzel text-xs tracking-[0.2em] uppercase font-bold transition-all cursor-pointer"
+                  >
+                    SAVE NEW ACCESS CODE
+                  </button>
+                </form>
               </div>
             </div>
           </div>
         )}
       </main>
+
+      {/* ===============================================================
+          ADD / EDIT SHOW MODAL
+      =============================================================== */}
+      {showModalOpen && (
+        <div className="fixed inset-0 z-[100000] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 md:p-8 overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/20 p-6 md:p-8 shadow-2xl my-auto">
+            <button
+              onClick={() => setShowModalOpen(false)}
+              className="absolute right-5 top-5 p-2 text-[#B8B0A5] hover:text-[#F2EFE9] transition-colors rounded-full bg-white/5"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="border-b border-white/10 pb-4 mb-6">
+              <h3 className="text-2xl font-serif uppercase tracking-wider text-[#F2EFE9]">
+                {editingShow ? 'EDIT PRODUCTION SHOW' : 'ADD NEW PRODUCTION SHOW'}
+              </h3>
+              <p className="text-xs text-[#B8B0A5]">
+                Configure show details, date, venue, and seating tier ticket prices.
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveShow} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-1">
+                    SHOW TITLE *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={showForm.title}
+                    onChange={(e) => setShowForm({ ...showForm, title: e.target.value })}
+                    placeholder="e.g. HISTORY SHOW — THE CHRONICLE"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-3.5 py-2.5 text-xs outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-1">
+                    CATEGORY / FORMAT
+                  </label>
+                  <input
+                    type="text"
+                    value={showForm.category}
+                    onChange={(e) => setShowForm({ ...showForm, category: e.target.value })}
+                    placeholder="GRAND THEATRE / PRIVATE CHAMBER"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-3.5 py-2.5 text-xs outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-1">
+                  SHORT SUBTITLE / DESCRIPTION
+                </label>
+                <input
+                  type="text"
+                  value={showForm.subtitle}
+                  onChange={(e) => setShowForm({ ...showForm, subtitle: e.target.value })}
+                  placeholder="Where choices and perception collide..."
+                  className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-3.5 py-2.5 text-xs outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-1">
+                    SHOW DATE *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={showForm.date}
+                    onChange={(e) => setShowForm({ ...showForm, date: e.target.value })}
+                    placeholder="e.g. 15 November 2025"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-3.5 py-2.5 text-xs outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-1">
+                    SHOW TIME *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={showForm.time}
+                    onChange={(e) => setShowForm({ ...showForm, time: e.target.value })}
+                    placeholder="e.g. 7:30 PM IST"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-3.5 py-2.5 text-xs outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-1">
+                    VENUE NAME *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={showForm.venue}
+                    onChange={(e) => setShowForm({ ...showForm, venue: e.target.value })}
+                    placeholder="e.g. Royal Opera House"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-3.5 py-2.5 text-xs outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-1">
+                    CITY *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={showForm.city}
+                    onChange={(e) => setShowForm({ ...showForm, city: e.target.value })}
+                    placeholder="e.g. Mumbai"
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-3.5 py-2.5 text-xs outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase mb-1">
+                    STATUS
+                  </label>
+                  <select
+                    value={showForm.status}
+                    onChange={(e) => setShowForm({ ...showForm, status: e.target.value })}
+                    className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-3 py-2 text-xs outline-none"
+                  >
+                    <option value="AVAILABLE">AVAILABLE</option>
+                    <option value="SELLING FAST">SELLING FAST</option>
+                    <option value="SOLD OUT">SOLD OUT</option>
+                    <option value="HIDDEN">HIDDEN (DRAFT)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Tiers config */}
+              <div className="pt-3 border-t border-white/10">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-[10px] font-cinzel tracking-widest text-[#B8B0A5] uppercase font-semibold">
+                    SEATING TIERS &amp; TICKET PRICES (INR)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowForm({
+                        ...showForm,
+                        tiers: [
+                          ...(showForm.tiers || []),
+                          { id: `tier-${Date.now()}`, name: 'New Tier', price: 1499, description: 'Seating pass', seatsAvailable: 50, seatsTotal: 50 }
+                        ]
+                      })
+                    }
+                    className="text-[10px] font-cinzel tracking-widest text-[#C5A059] hover:text-[#F2EFE9] uppercase"
+                  >
+                    + ADD TIER
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {showForm.tiers?.map((tier, idx) => (
+                    <div key={tier.id || idx} className="grid grid-cols-12 gap-2 bg-black p-2 border border-white/10 items-center text-xs">
+                      <div className="col-span-5">
+                        <input
+                          type="text"
+                          value={tier.name}
+                          onChange={(e) => {
+                            const newTiers = [...showForm.tiers];
+                            newTiers[idx].name = e.target.value;
+                            setShowForm({ ...showForm, tiers: newTiers });
+                          }}
+                          placeholder="Tier Name (e.g. VIP Circle)"
+                          className="w-full bg-transparent border border-white/15 px-2 py-1.5 text-xs text-[#F2EFE9]"
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <input
+                          type="number"
+                          value={tier.price}
+                          onChange={(e) => {
+                            const newTiers = [...showForm.tiers];
+                            newTiers[idx].price = Number(e.target.value);
+                            setShowForm({ ...showForm, tiers: newTiers });
+                          }}
+                          placeholder="Price ₹"
+                          className="w-full bg-transparent border border-white/15 px-2 py-1.5 text-xs text-[#C5A059] font-mono font-bold"
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <input
+                          type="number"
+                          value={tier.seatsAvailable}
+                          onChange={(e) => {
+                            const newTiers = [...showForm.tiers];
+                            newTiers[idx].seatsAvailable = Number(e.target.value);
+                            setShowForm({ ...showForm, tiers: newTiers });
+                          }}
+                          placeholder="Seats"
+                          className="w-full bg-transparent border border-white/15 px-2 py-1.5 text-xs text-[#B8B0A5]"
+                        />
+                      </div>
+                      <div className="col-span-1 text-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newTiers = showForm.tiers.filter((_, i) => i !== idx);
+                            setShowForm({ ...showForm, tiers: newTiers });
+                          }}
+                          className="text-[#8E1018] hover:text-white"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setShowModalOpen(false)}
+                  className="px-5 py-2.5 border border-white/20 text-xs font-cinzel uppercase text-[#B8B0A5] hover:text-[#F2EFE9]"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-[#C5A059] hover:bg-[#8E1018] text-black hover:text-[#F2EFE9] font-cinzel text-xs uppercase font-bold transition-all"
+                >
+                  SAVE SHOW
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

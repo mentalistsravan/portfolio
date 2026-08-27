@@ -4,6 +4,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { PortraitGallery } from './components/PortraitGallery';
 import { VideoModal } from './components/VideoModal';
 import { BookingForm } from './components/BookingForm';
+import { TicketingSection } from './components/TicketingSection';
 import { AdminDashboard } from './components/AdminDashboard';
 import { SiteSettingsProvider, useSiteSettings } from './context/SiteSettingsContext';
 
@@ -376,6 +377,12 @@ function PortfolioApp() {
 
 
         {/* ==================================================
+            PAGE 04B — LIVE PERFORMANCES & TICKETS
+        ================================================== */}
+        <TicketingSection />
+
+
+        {/* ==================================================
             PAGE 05 — MIRAGE
         ================================================== */}
         <section id="mirage" className="w-full bg-black text-[#F2EFE9] px-6 md:px-12 py-28 border-b border-white/10">
@@ -517,6 +524,7 @@ function PortfolioApp() {
             <a href="#mentalist" className="block hover:text-[#C5A059] transition-colors">THE MENTALIST</a>
             <a href="#experiences" className="block hover:text-[#C5A059] transition-colors">EXPERIENCES</a>
             <a href="#historyshow" className="block hover:text-[#C5A059] transition-colors">HISTORY SHOW</a>
+            <a href="#tickets" className="block hover:text-[#C5A059] transition-colors text-[#C5A059]">TICKETS &amp; SHOWS</a>
             <a href="#portraits" className="block hover:text-[#C5A059] transition-colors">PORTRAITS</a>
             <a href="#about" className="block hover:text-[#C5A059] transition-colors">ABOUT</a>
             <a href="#booking" className="block hover:text-[#C5A059] transition-colors">BOOK</a>
