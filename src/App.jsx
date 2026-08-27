@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { LoadingScreen } from './components/LoadingScreen';
-import { InteractiveMicroExperience } from './components/InteractiveMicroExperience';
 import { PortraitGallery } from './components/PortraitGallery';
 import { VideoModal } from './components/VideoModal';
 import { BookingForm } from './components/BookingForm';
@@ -418,12 +417,6 @@ export default function App() {
             </div>
           </div>
         </section>
-
-
-        {/* ==================================================
-            PAGE 13 — THE EXPERIENCE (Interactive Micro-Experience)
-        ================================================== */}
-        <InteractiveMicroExperience />
 
 
         {/* ==================================================
