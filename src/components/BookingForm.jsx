@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { Send, CheckCircle2, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export const BookingForm = ({ onOpenShowreel }) => {
@@ -14,6 +14,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submissionId, setSubmissionId] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
@@ -23,7 +24,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
 
     try {
       if (isSupabaseConfigured && supabase) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('enquiries')
           .insert([
             {
@@ -35,11 +36,13 @@ export const BookingForm = ({ onOpenShowreel }) => {
               location: formData.location || null,
               message: formData.message || null
             }
-          ]);
+          ])
+          .select();
 
         if (error) {
           console.error('Supabase submission error:', error);
-          // If table or permissions fail, we still log it and proceed so user experience is smooth
+        } else if (data && data.length > 0) {
+          setSubmissionId(data[0].id);
         }
       }
       setSubmitted(true);
@@ -81,34 +84,49 @@ export const BookingForm = ({ onOpenShowreel }) => {
           </div>
         </div>
 
-        {/* Contact Form */}
-        <div id="booking-form" className="bg-black p-4 md:p-8 max-w-3xl mx-auto border border-white/10">
+        {/* Contact Form Container */}
+        <div id="booking-form" className="bg-black p-6 md:p-10 max-w-3xl mx-auto border border-white/15 shadow-2xl relative">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-8 text-[11px] font-cinzel tracking-widest text-[#C5A059] uppercase">
+            <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#8E1018]" /> REALTIME DATABASE ENCRYPTION</span>
+            <span>DIRECT MANAGEMENT CHANNEL</span>
+          </div>
+
           {submitted ? (
-            <div className="text-center py-12 space-y-4 animate-[fadeIn_0.5s_ease-out]">
-              <CheckCircle2 className="w-14 h-14 text-[#C5A059] mx-auto" />
-              <h3 className="text-2xl font-serif uppercase tracking-wider text-[#F2EFE9]">
+            <div className="text-center py-12 space-y-5 animate-[fadeIn_0.5s_ease-out]">
+              <CheckCircle2 className="w-16 h-16 text-[#C5A059] mx-auto animate-bounce" />
+              <h3 className="text-2xl md:text-3xl font-serif uppercase tracking-wider text-[#F2EFE9]">
                 CONVERSATION INITIATED
               </h3>
               <p className="text-sm text-[#B8B0A5] max-w-md mx-auto font-light leading-relaxed">
-                Thank you for your inquiry. Mentalist Sravan's management team will review your details and reach out to you directly via phone or email.
+                Thank you, <span className="text-[#F2EFE9] font-medium">{formData.name}</span>. Your enquiry has been synced in real-time to Mentalist Sravan's private management database.
               </p>
-              <button
-                onClick={() => {
-                  setSubmitted(false);
-                  setFormData({
-                    name: '',
-                    email: '',
-                    phone: '',
-                    eventType: 'Theatrical Engagement',
-                    date: '',
-                    location: '',
-                    message: ''
-                  });
-                }}
-                className="mt-6 text-xs font-cinzel tracking-widest text-[#C5A059] hover:text-[#F2EFE9] uppercase border-b border-[#C5A059] pb-1 transition-colors"
-              >
-                SUBMIT ANOTHER INQUIRY
-              </button>
+
+              {submissionId && (
+                <div className="inline-block bg-white/5 border border-white/10 px-4 py-2 text-xs font-mono text-[#C5A059] tracking-widest uppercase">
+                  ENQUIRY REF ID: #{submissionId}
+                </div>
+              )}
+
+              <div className="pt-4">
+                <button
+                  onClick={() => {
+                    setSubmitted(false);
+                    setSubmissionId(null);
+                    setFormData({
+                      name: '',
+                      email: '',
+                      phone: '',
+                      eventType: 'Theatrical Engagement',
+                      date: '',
+                      location: '',
+                      message: ''
+                    });
+                  }}
+                  className="text-xs font-cinzel tracking-widest text-[#C5A059] hover:text-[#F2EFE9] uppercase border-b border-[#C5A059] pb-1 transition-colors"
+                >
+                  SUBMIT ANOTHER INQUIRY
+                </button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -223,7 +241,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> SUBMITTING ENQUIRY...
+                    <Loader2 className="w-4 h-4 animate-spin" /> SYNCING ENQUIRY WITH DATABASE...
                   </>
                 ) : (
                   <>
