@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigation } from './components/Navigation';
 import { LoadingScreen } from './components/LoadingScreen';
 import { PortraitGallery } from './components/PortraitGallery';
 import { VideoModal } from './components/VideoModal';
 import { BookingForm } from './components/BookingForm';
+import { AdminDashboard } from './components/AdminDashboard';
+import { SiteSettingsProvider, useSiteSettings } from './context/SiteSettingsContext';
 
 import {
   HeroTriplePortraitVisual,
@@ -19,13 +21,36 @@ import {
   InstagramIcon
 } from './components/SravanVisuals';
 
-import { ArrowDown, Play, ChevronRight, Crown, ExternalLink } from 'lucide-react';
+import { ArrowDown, Play, ChevronRight, Crown, ExternalLink, ArrowRight } from 'lucide-react';
 
-export default function App() {
+function PortfolioApp() {
+  const { settings } = useSiteSettings();
   const [loading, setLoading] = useState(true);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [videoTitle, setVideoTitle] = useState('SHOWREEL');
   const [videoSrc, setVideoSrc] = useState(null);
+
+  // Hidden route detection: /admin or #admin
+  const [isAdmin, setIsAdmin] = useState(() => {
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    return path === '/admin' || path === '/admin/' || hash === '#admin';
+  });
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      setIsAdmin(path === '/admin' || path === '/admin/' || hash === '#admin');
+    };
+
+    window.addEventListener('popstate', handleRouteChange);
+    window.addEventListener('hashchange', handleRouteChange);
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+      window.removeEventListener('hashchange', handleRouteChange);
+    };
+  }, []);
 
   const openVideo = (title, src = null) => {
     setVideoTitle(title);
@@ -33,12 +58,34 @@ export default function App() {
     setVideoModalOpen(true);
   };
 
+  // If visiting /admin or #admin, render secret Admin Dashboard
+  if (isAdmin) {
+    return <AdminDashboard />;
+  }
+
   return (
     <div className="relative bg-black text-[#F2EFE9] min-h-screen font-sans-body selection:bg-[#8E1018] selection:text-[#F2EFE9]">
-      {/* Opening Loading Sequence */}
-      {loading && <LoadingScreen onComplete={() => setLoading(false)} />}
+      {/* Optional Top Announcement Banner (Controlled from Admin Dashboard) */}
+      {settings.announcementActive && settings.announcementText && (
+        <aside aria-label="Announcement" className="relative z-50 bg-[#8E1018] text-[#F2EFE9] px-4 py-2 text-center text-xs font-cinzel tracking-widest uppercase flex items-center justify-center gap-2">
+          <span>{settings.announcementText}</span>
+          {settings.announcementLink && (
+            <a
+              href={settings.announcementLink}
+              className="underline font-bold hover:text-[#C5A059] transition-colors inline-flex items-center gap-1"
+            >
+              DETAILS <ArrowRight className="w-3 h-3" />
+            </a>
+          )}
+        </aside>
+      )}
 
-      {/* Navigation Header - Always 'Mentalist Sravan' */}
+      {/* Opening Loading Sequence (Toggleable in Admin Dashboard) */}
+      {settings.enableLoadingSequence && loading && (
+        <LoadingScreen onComplete={() => setLoading(false)} />
+      )}
+
+      {/* Navigation Header - Always 'Mentalist Sravan' (No admin link) */}
       <Navigation />
 
       <main className="relative z-10 bg-black">
@@ -52,22 +99,23 @@ export default function App() {
               <div className="inline-flex items-center gap-2 py-1">
                 <Crown className="w-4 h-4 text-[#C5A059]" />
                 <span className="text-[11px] font-cinzel tracking-[0.3em] text-[#C5A059] uppercase font-semibold">
-                  PSYCHOLOGICAL ILLUSION • PERFORMANCE ART
+                  {settings.heroHighlight || 'PSYCHOLOGICAL ILLUSION • PERFORMANCE ART'}
                 </span>
               </div>
 
               <h1 className="text-4xl sm:text-6xl lg:text-8xl font-serif text-[#F2EFE9] tracking-tighter uppercase leading-[0.9]">
-                MENTALIST <br />
-                <span className="italic font-light text-[#C5A059]">SRAVAN</span>
+                {settings.heroTitle || 'MENTALIST SRAVAN'}
               </h1>
 
               <div className="text-lg sm:text-xl md:text-3xl font-serif text-[#B8B0A5] tracking-widest uppercase italic border-l-2 border-[#C5A059] pl-4">
-                WHERE THOUGHT <br />
-                <span className="text-[#8E1018] not-italic font-bold">BECOMES THEATRE.</span>
+                <span className="text-[#8E1018] not-italic font-bold">
+                  {settings.heroTagline || 'WHERE THOUGHT BECOMES THEATRE.'}
+                </span>
               </div>
 
               <p className="text-xs sm:text-sm text-[#B8B0A5] font-light leading-relaxed max-w-md">
-                Creating impossible experiences built around perception, psychology, choice, memory and human behaviour.
+                {settings.heroSubtitle ||
+                  'Creating impossible experiences built around perception, psychology, choice, memory and human behaviour.'}
               </p>
 
               {/* Plain CTAs */}
@@ -87,7 +135,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Hero Visual (Spotlight Portrait) */}
+            {/* Hero Visual (Triple Portrait) */}
             <div className="lg:col-span-6 h-[480px] sm:h-[580px] lg:h-[650px] w-full z-10">
               <HeroTriplePortraitVisual className="h-full w-full" />
             </div>
@@ -312,8 +360,13 @@ export default function App() {
 
             <div className="text-center pt-4">
               <button
-                onClick={() => openVideo('HISTORY SHOW — THEATRICAL STREAM', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4')}
-                className="px-8 py-4 bg-[#C5A059] hover:bg-[#8E1018] text-black hover:text-[#F2EFE9] font-cinzel text-xs tracking-[0.25em] uppercase font-bold transition-all duration-300 inline-flex items-center gap-3 rounded-sm"
+                onClick={() =>
+                  openVideo(
+                    'HISTORY SHOW — THEATRICAL STREAM',
+                    settings.historyShowVideo || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4'
+                  )
+                }
+                className="px-8 py-4 bg-[#C5A059] hover:bg-[#8E1018] text-black hover:text-[#F2EFE9] font-cinzel text-xs tracking-[0.25em] uppercase font-bold transition-all duration-300 inline-flex items-center gap-3 rounded-sm cursor-pointer"
               >
                 <Play className="w-4 h-4 fill-current" /> STREAM HISTORY SHOW TRAILER IN SITE
               </button>
@@ -337,8 +390,13 @@ export default function App() {
                 </h2>
               </div>
               <button
-                onClick={() => openVideo('MIRAGE — THEATRICAL STREAM', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4')}
-                className="text-xs font-cinzel tracking-widest text-[#C5A059] hover:text-[#F2EFE9] uppercase flex items-center gap-2"
+                onClick={() =>
+                  openVideo(
+                    'MIRAGE — THEATRICAL STREAM',
+                    settings.mirageVideo || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
+                  )
+                }
+                className="text-xs font-cinzel tracking-widest text-[#C5A059] hover:text-[#F2EFE9] uppercase flex items-center gap-2 cursor-pointer"
               >
                 STREAM TRAILER IN SITE <Play className="w-4 h-4 fill-current" />
               </button>
@@ -364,8 +422,13 @@ export default function App() {
                 </h2>
               </div>
               <button
-                onClick={() => openVideo('INSIDER — THRILLER STREAM', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4')}
-                className="text-xs font-cinzel tracking-widest text-[#C5A059] hover:text-[#F2EFE9] uppercase flex items-center gap-2"
+                onClick={() =>
+                  openVideo(
+                    'INSIDER — THRILLER STREAM',
+                    settings.insiderVideo || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+                  )
+                }
+                className="text-xs font-cinzel tracking-widest text-[#C5A059] hover:text-[#F2EFE9] uppercase flex items-center gap-2 cursor-pointer"
               >
                 STREAM TRAILER IN SITE <Play className="w-4 h-4 fill-current" />
               </button>
@@ -377,7 +440,7 @@ export default function App() {
 
 
         {/* ==================================================
-            PAGE 11 — PORTRAIT GALLERY SECTION (REPLACING ARCHIVE)
+            PAGE 11 — PORTRAIT GALLERY SECTION
         ================================================== */}
         <PortraitGallery />
 
@@ -422,7 +485,14 @@ export default function App() {
         {/* ==================================================
             PAGE 15 — BOOKING
         ================================================== */}
-        <BookingForm onOpenShowreel={() => openVideo('MENTALIST SRAVAN — SHOWREEL STREAM', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4')} />
+        <BookingForm
+          onOpenShowreel={() =>
+            openVideo(
+              'MENTALIST SRAVAN — SHOWREEL STREAM',
+              settings.mainShowreelVideo || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4'
+            )
+          }
+        />
       </main>
 
 
@@ -439,7 +509,7 @@ export default function App() {
               </h3>
             </div>
             <p className="text-xs font-serif italic text-[#C5A059] tracking-widest uppercase">
-              WHERE THOUGHT BECOMES THEATRE.
+              {settings.heroTagline || 'WHERE THOUGHT BECOMES THEATRE.'}
             </p>
           </div>
 
@@ -476,5 +546,13 @@ export default function App() {
         videoSrc={videoSrc}
       />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <SiteSettingsProvider>
+      <PortfolioApp />
+    </SiteSettingsProvider>
   );
 }
