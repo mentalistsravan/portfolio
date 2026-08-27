@@ -8,20 +8,32 @@ CREATE TABLE IF NOT EXISTS public.enquiries (
   event_type TEXT,
   date TEXT,
   location TEXT,
-  message TEXT
+  message TEXT,
+  ref_code TEXT
 );
+
+-- Add ref_code column if the table already exists (run this if upgrading)
+-- ALTER TABLE public.enquiries ADD COLUMN IF NOT EXISTS ref_code TEXT;
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 
--- Allow anonymous users to submit enquiries
+-- Drop existing policies if re-running
+DROP POLICY IF EXISTS "Allow public insert to enquiries" ON public.enquiries;
+DROP POLICY IF EXISTS "Allow authenticated read enquiries" ON public.enquiries;
+
+-- Allow anonymous users to INSERT enquiries
 CREATE POLICY "Allow public insert to enquiries"
 ON public.enquiries FOR INSERT
 TO anon
 WITH CHECK (true);
 
--- Allow authenticated users / service role to view enquiries
+-- Allow service role / authenticated users to SELECT all enquiries (management view)
 CREATE POLICY "Allow authenticated read enquiries"
 ON public.enquiries FOR SELECT
 TO authenticated
 USING (true);
+
+-- Enable Realtime for this table
+-- Run in the Supabase dashboard: Table Editor → enquiries → Realtime toggle ON
+-- Or run: ALTER PUBLICATION supabase_realtime ADD TABLE public.enquiries;

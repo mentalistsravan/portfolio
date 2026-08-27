@@ -143,7 +143,7 @@ export default function App() {
 
             {/* Sravan Clasped Hands Suit Portrait */}
             <div className="lg:col-span-5 h-[480px] lg:h-[580px] overflow-hidden bg-black flex items-center justify-center">
-              <img src={sravanHandsSuit} alt="Mentalist Sravan Portrait" className="w-full h-full object-contain filter brightness-105 contrast-110" />
+              <img src={sravanHandsSuit} alt="" role="presentation" className="w-full h-full object-contain filter brightness-105 contrast-110" />
             </div>
           </div>
         </section>
@@ -154,7 +154,7 @@ export default function App() {
         ================================================== */}
         <section className="relative w-full min-h-[70vh] bg-black text-[#F2EFE9] px-6 md:px-12 py-28 flex items-center justify-center border-b border-white/10 overflow-hidden">
           <div className="absolute inset-0 opacity-20 flex items-center justify-center pointer-events-none">
-            <img src={sravanSideProfile} alt="Shadow Profile" className="w-full h-full object-cover filter contrast-125 brightness-75" />
+            <img src={sravanSideProfile} alt="" role="presentation" className="w-full h-full object-cover filter contrast-125 brightness-75" />
           </div>
           <div className="relative z-10 max-w-4xl mx-auto text-center space-y-10">
             <span className="text-xs text-[#C5A059] tracking-[0.3em] uppercase font-cinzel block">
@@ -388,7 +388,7 @@ export default function App() {
         <section id="about" className="w-full bg-black text-[#F2EFE9] px-6 md:px-12 py-28 border-b border-white/10">
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-5 h-[480px] lg:h-[550px] overflow-hidden bg-black flex items-center justify-center">
-              <img src={sravanSpotlight} alt="Mentalist Sravan Spotlight" className="w-full h-full object-contain filter brightness-105 contrast-110" />
+              <img src={sravanSpotlight} alt="" role="presentation" className="w-full h-full object-contain filter brightness-105 contrast-110" />
             </div>
 
             <div className="lg:col-span-7 space-y-6">

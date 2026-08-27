@@ -130,7 +130,8 @@ export const PortraitGallery = () => {
               <div className={`w-full ${item.aspect} overflow-hidden bg-black`}>
                 <img
                   src={item.image}
-                  alt={item.title}
+                  alt=""
+                  role="presentation"
                   className="w-full h-full object-cover filter brightness-95 contrast-105 group-hover:scale-105 group-hover:brightness-105 transition-all duration-700"
                 />
               </div>
@@ -184,7 +185,8 @@ export const PortraitGallery = () => {
           <div className="relative w-full max-w-5xl max-h-[75vh] my-auto flex items-center justify-center overflow-hidden">
             <img
               src={selectedPortrait.image}
-              alt={selectedPortrait.title}
+              alt=""
+              role="presentation"
               className="max-w-full max-h-[75vh] object-contain shadow-2xl filter brightness-105 contrast-105"
             />
           </div>

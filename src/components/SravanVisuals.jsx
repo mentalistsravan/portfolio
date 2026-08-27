@@ -30,7 +30,8 @@ export const LogoEmblem = ({ className = "h-10 w-auto", showText = false }) => (
   <div className="flex items-center gap-3">
     <img
       src={mspLogoImg}
-      alt="Mentalist Sravan Logo"
+      alt=""
+      role="presentation"
       className={`object-contain ${className}`}
     />
     {showText && (
@@ -46,7 +47,8 @@ export const HeroTriplePortraitVisual = ({ className = "" }) => (
   <div className={`relative w-full h-full flex items-center justify-center bg-black overflow-hidden ${className}`}>
     <img
       src={sravanTripleImg}
-      alt="Mentalist Sravan - Triple Portrait"
+      alt=""
+      role="presentation"
       className="w-full h-full object-contain max-h-[80vh] filter brightness-105 contrast-110 transition-transform duration-700 hover:scale-[1.01]"
     />
   </div>
@@ -57,7 +59,8 @@ export const HistoryShowVisual = ({ className = "" }) => (
   <div className={`relative w-full h-96 md:h-[450px] bg-black overflow-hidden flex flex-col justify-between p-6 ${className}`}>
     <img
       src={sravanTripleImg}
-      alt="History Show - Mentalist Sravan"
+      alt=""
+      role="presentation"
       className="absolute inset-0 w-full h-full object-cover opacity-40 filter contrast-125 brightness-90"
     />
     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/80" />
@@ -101,7 +104,8 @@ export const MirageVisual = ({ className = "" }) => (
   <div className={`relative w-full h-96 md:h-[450px] bg-black overflow-hidden flex flex-col justify-between p-6 ${className}`}>
     <img
       src={sravanNeonDuotoneImg}
-      alt="Mirage - Mentalist Sravan"
+      alt=""
+      role="presentation"
       className="absolute inset-0 w-full h-full object-cover opacity-50 filter contrast-110 brightness-90"
     />
     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
@@ -134,7 +138,8 @@ export const InsiderVisual = ({ className = "" }) => (
   <div className={`relative w-full h-96 md:h-[450px] bg-black overflow-hidden flex flex-col justify-between p-6 ${className}`}>
     <img
       src={sravanBalconyHarborImg}
-      alt="Insider - Mentalist Sravan"
+      alt=""
+      role="presentation"
       className="absolute inset-0 w-full h-full object-cover opacity-45 filter contrast-110 brightness-90"
     />
     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
@@ -168,7 +173,7 @@ export const InsiderVisual = ({ className = "" }) => (
 export const StagePerformanceVisual = ({ className = "" }) => (
   <div className={`relative w-full h-96 bg-black p-6 overflow-hidden flex flex-col justify-between ${className}`}>
     <div className="relative z-10 text-center my-auto space-y-4 max-w-xl mx-auto">
-      <img src={mspLogoImg} alt="MSP Emblem" className="w-16 h-16 mx-auto object-contain" />
+      <img src={mspLogoImg} alt="" role="presentation" className="w-16 h-16 mx-auto object-contain" />
       <h3 className="text-3xl md:text-5xl font-serif text-[#F2EFE9] tracking-wider uppercase">
         THE STAGE CHANGES EVERYTHING.
       </h3>
