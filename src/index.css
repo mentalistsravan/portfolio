@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-black: #050505;
+    --bg-charcoal: #111111;
+    --bg-graphite: #1a1a1a;
+    --text-ivory: #f2efe9;
+    --accent-crimson: #8e1018;
+    --text-muted-grey: #b8b0a5;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: #050505;
+    color: #f2efe9;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    background-color: #050505;
+    color: #f2efe9;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-serif-display {
+    font-family: 'Cormorant Garamond', 'Cinzel', Georgia, serif;
+  }
+
+  .font-cinzel {
+    font-family: 'Cinzel', Georgia, serif;
+  }
+
+  .font-sans-body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8e1018;
+}
+
+/* Film Grain Overlay */
+.film-grain {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  width: 200%;
+  height: 200vh;
+  background-image: radial-gradient(rgba(242, 239, 233, 0.08) 1px, transparent 0);
+  background-size: 16px 16px;
+  animation: grain 8s steps(10) infinite;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.15;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-3%, -5%); }
+  30% { transform: translate(2%, -8%); }
+  50% { transform: translate(5%, 4%); }
+  70% { transform: translate(3%, 2%); }
+  90% { transform: translate(-4%, 4%); }
+}
+
+/* Vignette Shadow */
+.vignette-overlay {
+  background: radial-gradient(circle at center, transparent 40%, rgba(5, 5, 5, 0.85) 100%);
+  pointer-events: none;
+}
+
+/* Glassmorphism Editorial Dark Cards */
+.dark-glass {
+  background: rgba(17, 17, 17, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(242, 239, 233, 0.08);
+}
+
+.dark-glass-hover {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark-glass-hover:hover {
+  border-color: rgba(142, 16, 24, 0.4);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+}
+
+/* Typography styles */
+.tracking-cinzel {
+  letter-spacing: 0.25em;
+}
+
+.tracking-subtle {
+  letter-spacing: 0.15em;
+}
+
+/* Hide default cursor on desktop when custom cursor active */
+@media (min-width: 1024px) {
+  body.custom-cursor-active {
+    cursor: none;
+  }
+  body.custom-cursor-active a,
+  body.custom-cursor-active button,
+  body.custom-cursor-active [role="button"] {
+    cursor: none;
+  }
+}
