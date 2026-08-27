@@ -41,13 +41,13 @@ export const LogoEmblem = ({ className = "h-10 w-auto", showText = false }) => (
   </div>
 );
 
-// Hero Visual: Spotlight Dramatic Portrait on Pure Black
+// Hero Visual: Triple Portrait on Pure Black
 export const HeroTriplePortraitVisual = ({ className = "" }) => (
   <div className={`relative w-full h-full flex items-center justify-center bg-black overflow-hidden ${className}`}>
     <img
-      src={sravanSpotlightImg}
-      alt="Mentalist Sravan - Spotlight Portrait"
-      className="w-full h-full object-contain max-h-[80vh] filter brightness-105 contrast-110 transition-transform duration-700 hover:scale-[1.02]"
+      src={sravanTripleImg}
+      alt="Mentalist Sravan - Triple Portrait"
+      className="w-full h-full object-contain max-h-[80vh] filter brightness-105 contrast-110 transition-transform duration-700 hover:scale-[1.01]"
     />
   </div>
 );
