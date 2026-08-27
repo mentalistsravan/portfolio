@@ -143,17 +143,8 @@ export const LoadingScreen = ({ onComplete }) => {
       }
     }, 800);
 
-    // Keyboard shortcut to skip
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
-        finish();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-
     return () => {
       clearTimeout(fallbackTimer);
-      window.removeEventListener('keydown', handleKeyDown);
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
@@ -166,13 +157,13 @@ export const LoadingScreen = ({ onComplete }) => {
         fading ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
-      {/* Centered Image Sequence Canvas */}
-      <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-6">
+      {/* Sequence Canvas: Stretched on desktop, preserved aspect ratio on mobile */}
+      <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
         <canvas
           ref={canvasRef}
           width={720}
           height={1280}
-          className="w-auto h-full max-h-screen max-w-full object-contain filter brightness-105 contrast-105"
+          className="w-auto h-full max-h-screen max-w-full object-contain md:w-full md:h-full md:max-w-none md:max-h-none md:object-fill filter brightness-105 contrast-105"
         />
 
         {/* Minimal loading indicator while initial buffer fills */}
@@ -184,16 +175,6 @@ export const LoadingScreen = ({ onComplete }) => {
             </span>
           </div>
         )}
-      </div>
-
-      {/* Top Bar with Skip Button */}
-      <div className="absolute top-6 right-6 z-20">
-        <button
-          onClick={finish}
-          className="px-4 py-2 text-[10px] sm:text-xs font-cinzel tracking-[0.25em] text-[#B8B0A5] hover:text-[#F2EFE9] border border-white/10 hover:border-white/30 uppercase transition-all bg-black/40 backdrop-blur-sm rounded-sm flex items-center gap-2 cursor-pointer"
-        >
-          SKIP INTRO <span>✕</span>
-        </button>
       </div>
 
       {/* Bottom Progress Bar */}
