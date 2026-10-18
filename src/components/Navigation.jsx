@@ -19,6 +19,7 @@ export const Navigation = () => {
     { name: 'THE ARTIST', href: '#mentalist' },
     { name: 'PHILOSOPHY', href: '#philosophy' },
     { name: 'REPERTOIRE', href: '#repertoire' },
+    { name: 'STAGE', href: '#stage' },
     { name: 'PORTRAITS', href: '#portraits' },
     { name: 'ABOUT', href: '#about' },
     { name: 'INQUIRIES', href: '#booking' },

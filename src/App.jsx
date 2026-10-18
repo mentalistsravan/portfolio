@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navigation } from './components/Navigation';
+import { ShowMarquee } from './components/ShowMarquee';
 import { PortraitGallery } from './components/PortraitGallery';
 import { VideoModal } from './components/VideoModal';
 import { BookingForm } from './components/BookingForm';
@@ -467,6 +468,12 @@ function PortfolioApp() {
 
 
         {/* ==================================================
+            STAGE CHRONICLES — LIVE SHOW IMAGES MARQUEE
+        ================================================== */}
+        <ShowMarquee />
+
+
+        {/* ==================================================
             PAGE 11 — PORTRAIT GALLERY SECTION
         ================================================== */}
         <PortraitGallery />
@@ -544,6 +551,7 @@ function PortfolioApp() {
             <a href="#mentalist" className="block hover:text-[#C5A059] transition-colors">THE ARTIST</a>
             <a href="#philosophy" className="block hover:text-[#C5A059] transition-colors">PHILOSOPHY</a>
             <a href="#repertoire" className="block hover:text-[#C5A059] transition-colors">REPERTOIRE</a>
+            <a href="#stage" className="block hover:text-[#C5A059] transition-colors">STAGE CHRONICLES</a>
             <a href="#portraits" className="block hover:text-[#C5A059] transition-colors">PORTRAITS</a>
             <a href="#about" className="block hover:text-[#C5A059] transition-colors">ABOUT</a>
             <a href="#booking" className="block hover:text-[#C5A059] transition-colors">INQUIRIES</a>
