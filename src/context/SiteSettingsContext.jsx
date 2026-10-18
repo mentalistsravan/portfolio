@@ -99,10 +99,10 @@ export const defaultSettings = {
   heroSubtitle: 'Creating impossible experiences built around perception, psychology, choice, memory and human behaviour.',
   heroHighlight: 'PSYCHOLOGICAL ILLUSION • PERFORMANCE ART',
   bookingBadge: 'AVAILABLE FOR LIVE THEATRE & PRIVATE BESPOKE ENGAGEMENTS',
-  enableLoadingSequence: true,
+  enableLoadingSequence: false,
   announcementActive: false,
-  announcementText: 'EXCLUSIVE 2025-2026 THEATRICAL TOUR DATES ANNOUNCED',
-  announcementLink: '#tickets',
+  announcementText: 'OFFICIAL ARTIST PORTFOLIO & REPERTOIRE',
+  announcementLink: '#booking',
   historyShowVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
   mirageVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
   insiderVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
@@ -139,6 +139,7 @@ export const SiteSettingsProvider = ({ children }) => {
         return {
           ...defaultSettings,
           ...parsed,
+          enableLoadingSequence: false, // Ensure opening animation is off for entry homepage
           razorpayKeyId: resolvedKeyId,
           razorpayMode: parsed.razorpayMode || 'live',
           shows: parsed.shows && parsed.shows.length > 0 ? parsed.shows : initialShows

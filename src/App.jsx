@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Navigation } from './components/Navigation';
-import { LoadingScreen } from './components/LoadingScreen';
 import { PortraitGallery } from './components/PortraitGallery';
 import { VideoModal } from './components/VideoModal';
 import { BookingForm } from './components/BookingForm';
@@ -26,23 +25,30 @@ import { ArrowDown, Play, ChevronRight, Crown, ExternalLink, ArrowRight } from '
 
 function PortfolioApp() {
   const { settings } = useSiteSettings();
-  const [loading, setLoading] = useState(true);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [videoTitle, setVideoTitle] = useState('SHOWREEL');
   const [videoSrc, setVideoSrc] = useState(null);
 
-  // Hidden route detection: /admin or #admin
-  const [isAdmin, setIsAdmin] = useState(() => {
+  // Route detection: /admin or /tickets or /shows
+  const [currentRoute, setCurrentRoute] = useState(() => {
     const path = window.location.pathname.toLowerCase();
     const hash = window.location.hash.toLowerCase();
-    return path === '/admin' || path === '/admin/' || hash === '#admin';
+    if (path === '/admin' || path === '/admin/' || hash === '#admin') return 'admin';
+    if (path === '/tickets' || path === '/tickets/' || path === '/shows' || path === '/shows/' || hash === '#tickets-page') return 'tickets';
+    return 'home';
   });
 
   useEffect(() => {
     const handleRouteChange = () => {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
-      setIsAdmin(path === '/admin' || path === '/admin/' || hash === '#admin');
+      if (path === '/admin' || path === '/admin/' || hash === '#admin') {
+        setCurrentRoute('admin');
+      } else if (path === '/tickets' || path === '/tickets/' || path === '/shows' || path === '/shows/' || hash === '#tickets-page') {
+        setCurrentRoute('tickets');
+      } else {
+        setCurrentRoute('home');
+      }
     };
 
     window.addEventListener('popstate', handleRouteChange);
@@ -60,8 +66,33 @@ function PortfolioApp() {
   };
 
   // If visiting /admin or #admin, render secret Admin Dashboard
-  if (isAdmin) {
+  if (currentRoute === 'admin') {
     return <AdminDashboard />;
+  }
+
+  // If directly visiting /tickets or /shows, render dedicated standalone ticketing portal
+  if (currentRoute === 'tickets') {
+    return (
+      <div className="relative bg-black text-[#F2EFE9] min-h-screen font-sans-body selection:bg-[#8E1018] selection:text-[#F2EFE9]">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-b border-white/10 py-4 px-6 md:px-12 flex items-center justify-between">
+          <a href="/" className="flex items-center gap-3">
+            <LogoEmblem className="h-8 w-auto" />
+            <span className="text-base font-serif font-semibold tracking-wider text-[#F2EFE9] uppercase">
+              Mentalist Sravan
+            </span>
+          </a>
+          <a
+            href="/"
+            className="text-xs font-cinzel tracking-widest text-[#C5A059] hover:text-[#F2EFE9] transition-colors uppercase border border-[#C5A059]/40 px-4 py-2 rounded-sm"
+          >
+            ← RETURN TO PORTFOLIO
+          </a>
+        </header>
+        <main className="pt-20">
+          <TicketingSection />
+        </main>
+      </div>
+    );
   }
 
   return (
@@ -81,12 +112,7 @@ function PortfolioApp() {
         </aside>
       )}
 
-      {/* Opening Loading Sequence (Toggleable in Admin Dashboard) */}
-      {settings.enableLoadingSequence && loading && (
-        <LoadingScreen onComplete={() => setLoading(false)} />
-      )}
-
-      {/* Navigation Header - Always 'Mentalist Sravan' (No admin link) */}
+      {/* Navigation Header - Portfolio Header */}
       <Navigation />
 
       <main className="relative z-10 bg-black">
@@ -122,16 +148,16 @@ function PortfolioApp() {
               {/* Plain CTAs */}
               <div className="flex flex-wrap items-center gap-4 pt-4">
                 <a
-                  href="#mentalist"
+                  href="#repertoire"
                   className="px-8 py-4 bg-[#C5A059] text-black hover:bg-[#8E1018] hover:text-[#F2EFE9] text-xs font-cinzel tracking-[0.25em] uppercase font-bold transition-all duration-300 rounded-sm"
                 >
-                  ENTER THE EXPERIENCE
+                  EXPLORE PORTFOLIO
                 </a>
                 <a
                   href="#booking"
                   className="px-8 py-4 border border-white/20 hover:border-white text-[#F2EFE9] text-xs font-cinzel tracking-[0.25em] uppercase transition-all duration-300 rounded-sm"
                 >
-                  BOOK SRAVAN
+                  INQUIRE &amp; BOOK
                 </a>
               </div>
             </div>
@@ -149,7 +175,7 @@ function PortfolioApp() {
               Mentalist Sravan
             </span>
             <a href="#mentalist" className="flex items-center gap-2 text-[#C5A059] hover:text-[#F2EFE9] transition-colors">
-              SCROLL TO ENTER <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
+              SCROLL TO EXPLORE <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
             </a>
           </div>
         </section>
@@ -201,7 +227,7 @@ function PortfolioApp() {
         {/* ==================================================
             PAGE 03 — THE PHILOSOPHY (WITH SHADOW PROFILE)
         ================================================== */}
-        <section className="relative w-full min-h-[70vh] bg-black text-[#F2EFE9] px-6 md:px-12 py-28 flex items-center justify-center border-b border-white/10 overflow-hidden">
+        <section id="philosophy" className="relative w-full min-h-[70vh] bg-black text-[#F2EFE9] px-6 md:px-12 py-28 flex items-center justify-center border-b border-white/10 overflow-hidden">
           <div className="absolute inset-0 opacity-20 flex items-center justify-center pointer-events-none">
             <img src={sravanSideProfile} alt="" role="presentation" className="w-full h-full object-cover filter contrast-125 brightness-75" />
           </div>
@@ -229,9 +255,9 @@ function PortfolioApp() {
 
 
         {/* ==================================================
-            PAGE 04 — THE EXPERIENCES (WITH HISTORY SHOW)
+            PAGE 04 — THE REPERTOIRE
         ================================================== */}
-        <section id="experiences" className="w-full bg-black text-[#F2EFE9] px-6 md:px-12 py-28 border-b border-white/10">
+        <section id="repertoire" className="w-full bg-black text-[#F2EFE9] px-6 md:px-12 py-28 border-b border-white/10">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
               <div>
@@ -239,34 +265,34 @@ function PortfolioApp() {
                   02 / THE REPERTOIRE
                 </span>
                 <h2 className="text-4xl md:text-6xl font-serif tracking-tight uppercase">
-                  THE <br /> EXPERIENCES
+                  THE <br /> REPERTOIRE
                 </h2>
               </div>
               <div className="text-sm md:text-base font-cinzel text-[#B8B0A5] tracking-widest uppercase italic max-w-md">
                 Not tricks. <br />
                 Not demonstrations. <br />
-                <span className="text-[#C5A059] not-italic font-bold">Experiences.</span>
+                <span className="text-[#C5A059] not-italic font-bold">Artistic Experiences.</span>
               </div>
             </div>
 
             {/* Experience List */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              {/* HISTORY SHOW */}
+              {/* HISTORY */}
               <div className="bg-black flex flex-col justify-between group space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-[11px] text-[#C5A059] font-cinzel tracking-widest uppercase mb-4">
-                    <span>YEAR: 2025</span>
-                    <span>GRAND STAGE</span>
+                    <span>PRODUCTION</span>
+                    <span>GRAND THEATRE</span>
                   </div>
                   <h3 className="text-3xl md:text-4xl font-serif tracking-wider uppercase text-[#F2EFE9] group-hover:text-[#C5A059] transition-colors mb-4">
-                    HISTORY SHOW
+                    HISTORY
                   </h3>
                   <p className="text-sm text-[#B8B0A5] font-light leading-relaxed mb-6">
                     A grand theatrical mentalism production traveling through perception, human history, lost memories and historical decisions — where past choices and hidden secrets converge.
                   </p>
                 </div>
                 <a href="#historyshow" className="inline-flex items-center gap-2 text-xs font-cinzel tracking-widest text-[#C5A059] group-hover:text-[#F2EFE9] uppercase font-bold">
-                  EXPLORE HISTORY SHOW <ChevronRight className="w-4 h-4" />
+                  VIEW PRODUCTION <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
 
@@ -274,8 +300,8 @@ function PortfolioApp() {
               <div className="bg-black flex flex-col justify-between group space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-[11px] text-[#B8B0A5] font-cinzel tracking-widest uppercase mb-4">
-                    <span>YEAR: 2025</span>
-                    <span>THEATRE</span>
+                    <span>THEATRICAL WORK</span>
+                    <span>PERCEPTION</span>
                   </div>
                   <h3 className="text-3xl md:text-4xl font-serif tracking-wider uppercase text-[#F2EFE9] group-hover:text-[#C5A059] transition-colors mb-4">
                     MIRAGE
@@ -285,7 +311,7 @@ function PortfolioApp() {
                   </p>
                 </div>
                 <a href="#mirage" className="inline-flex items-center gap-2 text-xs font-cinzel tracking-widest text-[#F2EFE9] group-hover:text-[#C5A059] uppercase">
-                  VIEW EXPERIENCE <ChevronRight className="w-4 h-4" />
+                  VIEW WORK <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
 
@@ -293,8 +319,8 @@ function PortfolioApp() {
               <div className="bg-black flex flex-col justify-between group space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-[11px] text-[#B8B0A5] font-cinzel tracking-widest uppercase mb-4">
-                    <span>YEAR: 2024</span>
-                    <span>THRILLER</span>
+                    <span>PSYCHOLOGICAL THRILLER</span>
+                    <span>CHAMBER</span>
                   </div>
                   <h3 className="text-3xl md:text-4xl font-serif tracking-wider uppercase text-[#F2EFE9] group-hover:text-[#C5A059] transition-colors mb-4">
                     INSIDER
@@ -304,7 +330,7 @@ function PortfolioApp() {
                   </p>
                 </div>
                 <a href="#insider" className="inline-flex items-center gap-2 text-xs font-cinzel tracking-widest text-[#F2EFE9] group-hover:text-[#C5A059] uppercase">
-                  VIEW EXPERIENCE <ChevronRight className="w-4 h-4" />
+                  VIEW WORK <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
             </div>
@@ -313,17 +339,17 @@ function PortfolioApp() {
 
 
         {/* ==================================================
-            FEATURED PRODUCTION SHOW — HISTORY SHOW
+            FEATURED PRODUCTION — HISTORY
         ================================================== */}
         <section id="historyshow" className="w-full bg-black text-[#F2EFE9] px-6 md:px-12 py-28 border-b border-white/10">
           <div className="max-w-7xl mx-auto space-y-12">
             <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/10 pb-8">
               <div>
                 <span className="text-xs text-[#C5A059] tracking-[0.3em] uppercase font-cinzel mb-2 block">
-                  FEATURED PRODUCTION SHOW
+                  FEATURED PRODUCTION
                 </span>
                 <h2 className="text-5xl md:text-7xl font-serif tracking-tight uppercase text-[#F2EFE9]">
-                  HISTORY <span className="italic text-[#C5A059]">SHOW</span>
+                  HISTORY <span className="italic text-[#C5A059]">PRODUCTION</span>
                 </h2>
               </div>
               <div className="text-sm font-cinzel tracking-[0.25em] text-[#C5A059] uppercase italic mt-4 md:mt-0">
@@ -369,17 +395,11 @@ function PortfolioApp() {
                 }
                 className="px-8 py-4 bg-[#C5A059] hover:bg-[#8E1018] text-black hover:text-[#F2EFE9] font-cinzel text-xs tracking-[0.25em] uppercase font-bold transition-all duration-300 inline-flex items-center gap-3 rounded-sm cursor-pointer"
               >
-                <Play className="w-4 h-4 fill-current" /> STREAM HISTORY SHOW TRAILER IN SITE
+                <Play className="w-4 h-4 fill-current" /> STREAM PRODUCTION TRAILER IN SITE
               </button>
             </div>
           </div>
         </section>
-
-
-        {/* ==================================================
-            PAGE 04B — LIVE PERFORMANCES & TICKETS
-        ================================================== */}
-        <TicketingSection />
 
 
         {/* ==================================================
@@ -521,13 +541,12 @@ function PortfolioApp() {
           </div>
 
           <div className="md:col-span-3 space-y-2 text-xs font-cinzel tracking-widest text-[#B8B0A5] uppercase">
-            <a href="#mentalist" className="block hover:text-[#C5A059] transition-colors">THE MENTALIST</a>
-            <a href="#experiences" className="block hover:text-[#C5A059] transition-colors">EXPERIENCES</a>
-            <a href="#historyshow" className="block hover:text-[#C5A059] transition-colors">HISTORY SHOW</a>
-            <a href="#tickets" className="block hover:text-[#C5A059] transition-colors text-[#C5A059]">TICKETS &amp; SHOWS</a>
+            <a href="#mentalist" className="block hover:text-[#C5A059] transition-colors">THE ARTIST</a>
+            <a href="#philosophy" className="block hover:text-[#C5A059] transition-colors">PHILOSOPHY</a>
+            <a href="#repertoire" className="block hover:text-[#C5A059] transition-colors">REPERTOIRE</a>
             <a href="#portraits" className="block hover:text-[#C5A059] transition-colors">PORTRAITS</a>
             <a href="#about" className="block hover:text-[#C5A059] transition-colors">ABOUT</a>
-            <a href="#booking" className="block hover:text-[#C5A059] transition-colors">BOOK</a>
+            <a href="#booking" className="block hover:text-[#C5A059] transition-colors">INQUIRIES</a>
           </div>
 
           <div className="md:col-span-3 space-y-2 text-xs font-cinzel tracking-widest text-[#B8B0A5] uppercase">

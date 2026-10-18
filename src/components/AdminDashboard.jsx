@@ -648,7 +648,7 @@ export const AdminDashboard = () => {
                       type="text"
                       value={formData.announcementLink}
                       onChange={(e) => setFormData({ ...formData, announcementLink: e.target.value })}
-                      placeholder="#tickets or https://..."
+                      placeholder="#booking or https://..."
                       className="w-full bg-black border border-white/20 focus:border-[#C5A059] text-[#F2EFE9] px-4 py-3 text-xs tracking-wider outline-none transition-colors"
                     />
                   </div>
