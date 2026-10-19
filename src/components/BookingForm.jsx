@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { Send, CheckCircle2, Loader2, Phone, Mail, ArrowUpRight } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export const BookingForm = ({ onOpenShowreel }) => {
@@ -53,7 +53,7 @@ export const BookingForm = ({ onOpenShowreel }) => {
   return (
     <section id="booking" className="w-full bg-black text-[#F2EFE9] px-6 md:px-12 py-28 border-t border-white/10 relative overflow-hidden">
       <div className="max-w-5xl mx-auto relative z-10">
-        <div className="text-center mb-16">
+        <div className="text-center mb-14">
           <span className="text-xs text-[#8E1018] tracking-[0.3em] uppercase font-cinzel mb-4 block">
             05 / BOOKING &amp; INQUIRIES
           </span>
@@ -78,6 +78,49 @@ export const BookingForm = ({ onOpenShowreel }) => {
               STREAM SHOWREEL IN SITE
             </button>
           </div>
+        </div>
+
+        {/* Direct Contact Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mb-10">
+          <a
+            href="tel:+917736068934"
+            className="group p-5 bg-white/[0.02] border border-white/10 hover:border-[#C5A059]/60 hover:bg-[#C5A059]/[0.04] transition-all duration-300 flex items-center justify-between text-left"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-[#C5A059] group-hover:border-[#C5A059] group-hover:bg-[#C5A059]/10 transition-colors shrink-0">
+                <Phone className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-[10px] font-cinzel tracking-[0.25em] text-[#B8B0A5] group-hover:text-[#C5A059] uppercase block transition-colors">
+                  DIRECT CALL / WHATSAPP
+                </span>
+                <span className="text-sm sm:text-base font-mono text-[#F2EFE9] tracking-wider font-medium">
+                  +91 7736068934
+                </span>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-[#B8B0A5] group-hover:text-[#C5A059] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          </a>
+
+          <a
+            href="mailto:team@mentalistsravan.in"
+            className="group p-5 bg-white/[0.02] border border-white/10 hover:border-[#C5A059]/60 hover:bg-[#C5A059]/[0.04] transition-all duration-300 flex items-center justify-between text-left"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-[#C5A059] group-hover:border-[#C5A059] group-hover:bg-[#C5A059]/10 transition-colors shrink-0">
+                <Mail className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-[10px] font-cinzel tracking-[0.25em] text-[#B8B0A5] group-hover:text-[#C5A059] uppercase block transition-colors">
+                  OFFICIAL MANAGEMENT
+                </span>
+                <span className="text-sm sm:text-base font-sans-body text-[#F2EFE9] tracking-wider font-medium">
+                  team@mentalistsravan.in
+                </span>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-[#B8B0A5] group-hover:text-[#C5A059] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          </a>
         </div>
 
         {/* Contact Form Container */}
@@ -234,6 +277,13 @@ export const BookingForm = ({ onOpenShowreel }) => {
                   </>
                 )}
               </button>
+
+              <div className="pt-2 text-center text-[11px] font-cinzel tracking-widest text-[#B8B0A5]/80 uppercase flex flex-wrap items-center justify-center gap-2 border-t border-white/5">
+                <span>Direct Management:</span>
+                <a href="tel:+917736068934" className="text-[#F2EFE9] hover:text-[#C5A059] font-mono transition-colors">+91 7736068934</a>
+                <span className="text-white/20">•</span>
+                <a href="mailto:team@mentalistsravan.in" className="text-[#F2EFE9] hover:text-[#C5A059] font-sans-body normal-case transition-colors">team@mentalistsravan.in</a>
+              </div>
             </form>
           )}
         </div>

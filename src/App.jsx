@@ -22,7 +22,7 @@ import {
   InstagramIcon
 } from './components/SravanVisuals';
 
-import { ArrowDown, Play, ChevronRight, Crown, ExternalLink, ArrowRight } from 'lucide-react';
+import { ArrowDown, Play, ChevronRight, Crown, ExternalLink, ArrowRight, Phone, Mail } from 'lucide-react';
 
 function PortfolioApp() {
   const { settings } = useSiteSettings();
@@ -535,7 +535,7 @@ function PortfolioApp() {
       ================================================== */}
       <footer className="w-full bg-black text-[#F2EFE9] border-t border-white/10 px-6 md:px-12 py-16">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-start pb-12 border-b border-white/10">
-          <div className="md:col-span-6 space-y-4">
+          <div className="md:col-span-5 space-y-4">
             <div className="flex items-center gap-3">
               <LogoEmblem className="h-10 w-auto" />
               <h3 className="text-2xl font-serif font-bold tracking-wider text-[#F2EFE9] uppercase">
@@ -545,9 +545,13 @@ function PortfolioApp() {
             <p className="text-xs font-serif italic text-[#C5A059] tracking-widest uppercase">
               {settings.heroTagline || 'WHERE THOUGHT BECOMES THEATRE.'}
             </p>
+            <p className="text-xs text-[#B8B0A5] font-light max-w-sm leading-relaxed">
+              Available worldwide for grand stage illusions, exclusive private salons, and corporate theatrical keynotes.
+            </p>
           </div>
 
           <div className="md:col-span-3 space-y-2 text-xs font-cinzel tracking-widest text-[#B8B0A5] uppercase">
+            <span className="text-[#C5A059] text-[10px] block mb-2 font-semibold">NAVIGATION</span>
             <a href="#mentalist" className="block hover:text-[#C5A059] transition-colors">THE ARTIST</a>
             <a href="#philosophy" className="block hover:text-[#C5A059] transition-colors">PHILOSOPHY</a>
             <a href="#repertoire" className="block hover:text-[#C5A059] transition-colors">REPERTOIRE</a>
@@ -557,13 +561,38 @@ function PortfolioApp() {
             <a href="#booking" className="block hover:text-[#C5A059] transition-colors">INQUIRIES</a>
           </div>
 
-          <div className="md:col-span-3 space-y-2 text-xs font-cinzel tracking-widest text-[#B8B0A5] uppercase">
-            <a href="https://www.instagram.com/mentalist_sravan/" target="_blank" rel="noopener noreferrer" className="block hover:text-[#C5A059] transition-colors flex items-center gap-1">
-              INSTAGRAM <InstagramIcon className="w-3.5 h-3.5" /> ↗
-            </a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="block hover:text-[#C5A059] transition-colors">
-              YOUTUBE ↗
-            </a>
+          <div className="md:col-span-4 space-y-5 text-xs font-cinzel tracking-widest text-[#B8B0A5] uppercase">
+            <div>
+              <span className="text-[#C5A059] text-[10px] block mb-3 font-semibold">DIRECT CONTACT</span>
+              <div className="space-y-2.5 font-sans-body normal-case tracking-normal">
+                <a
+                  href="tel:+917736068934"
+                  className="flex items-center gap-2.5 text-[#F2EFE9] hover:text-[#C5A059] transition-colors font-mono text-xs"
+                >
+                  <Phone className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                  +91 7736068934
+                </a>
+                <a
+                  href="mailto:team@mentalistsravan.in"
+                  className="flex items-center gap-2.5 text-[#F2EFE9] hover:text-[#C5A059] transition-colors font-sans-body text-xs"
+                >
+                  <Mail className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                  team@mentalistsravan.in
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-[#C5A059] text-[10px] block mb-2 font-semibold">CHANNELS</span>
+              <div className="flex items-center gap-5">
+                <a href="https://www.instagram.com/mentalist_sravan/" target="_blank" rel="noopener noreferrer" className="hover:text-[#C5A059] transition-colors flex items-center gap-1">
+                  INSTAGRAM <InstagramIcon className="w-3.5 h-3.5" /> ↗
+                </a>
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#C5A059] transition-colors">
+                  YOUTUBE ↗
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 

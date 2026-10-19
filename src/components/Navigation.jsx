@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Phone, Mail } from 'lucide-react';
 import { AudioAmbient } from './AudioAmbient';
 import { LogoEmblem } from './SravanVisuals';
 
@@ -120,9 +120,16 @@ export const Navigation = () => {
           ))}
         </div>
 
-        <div className="mt-12 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-[#B8B0A5] font-cinzel">
-          <span>Mentalist Sravan</span>
-          <span className="text-[#C5A059]">WHERE THOUGHT BECOMES THEATRE.</span>
+        <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-[#B8B0A5]">
+          <div className="space-y-2 font-sans-body">
+            <a href="tel:+917736068934" className="flex items-center gap-2 text-[#F2EFE9] hover:text-[#C5A059] font-mono transition-colors">
+              <Phone className="w-3.5 h-3.5 text-[#C5A059]" /> +91 7736068934
+            </a>
+            <a href="mailto:team@mentalistsravan.in" className="flex items-center gap-2 text-[#F2EFE9] hover:text-[#C5A059] transition-colors">
+              <Mail className="w-3.5 h-3.5 text-[#C5A059]" /> team@mentalistsravan.in
+            </a>
+          </div>
+          <span className="text-[#C5A059] font-cinzel">WHERE THOUGHT BECOMES THEATRE.</span>
         </div>
       </div>
     </>

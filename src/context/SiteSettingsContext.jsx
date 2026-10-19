@@ -106,7 +106,9 @@ export const defaultSettings = {
   historyShowVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
   mirageVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
   insiderVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-  mainShowreelVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+  // Direct Contact Details
+  contactPhone: '+91 7736068934',
+  contactEmail: 'team@mentalistsravan.in',
   // Razorpay Gateway Config
   razorpayKeyId: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_TUtOXJ88N8ANSp',
   razorpayMode: 'live', // 'test' | 'live'
